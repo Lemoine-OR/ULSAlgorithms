@@ -19,12 +19,18 @@ Remove-Item -LiteralPath $testResults -Recurse -Force -ErrorAction SilentlyConti
 New-Item -ItemType Directory -Path $testResults -Force | Out-Null
 
 Write-Host "Restoring $($target.Path)"
-& dotnet restore $target.Path
-if ($LASTEXITCODE -ne 0) { throw 'dotnet restore failed.' }
+& dotnet restore $target.Path | Out-Host
+$restoreExitCode = $LASTEXITCODE
+if ($restoreExitCode -ne 0) {
+    throw "dotnet restore failed with exit code $restoreExitCode."
+}
 
 Write-Host "Building $($target.Path) in Release configuration"
-& dotnet build $target.Path --configuration Release --no-restore
-if ($LASTEXITCODE -ne 0) { throw 'dotnet build failed.' }
+& dotnet build $target.Path --configuration Release --no-restore | Out-Host
+$buildExitCode = $LASTEXITCODE
+if ($buildExitCode -ne 0) {
+    throw "dotnet build failed with exit code $buildExitCode."
+}
 
 $testProjects = @(
     Get-ChildItem -LiteralPath (Join-Path $root 'tests') -Recurse -File -Filter '*.csproj' -ErrorAction SilentlyContinue |
@@ -37,9 +43,11 @@ foreach ($project in $testProjects) {
         --configuration Release `
         --no-restore `
         --logger "trx;LogFileName=$($project.BaseName).trx" `
-        --results-directory $testResults
-    if ($LASTEXITCODE -ne 0) {
-        throw "Tests failed for '$($project.FullName)'."
+        --results-directory $testResults | Out-Host
+
+    $testExitCode = $LASTEXITCODE
+    if ($testExitCode -ne 0) {
+        throw "Tests failed for '$($project.FullName)' (exit code $testExitCode)."
     }
 }
 
