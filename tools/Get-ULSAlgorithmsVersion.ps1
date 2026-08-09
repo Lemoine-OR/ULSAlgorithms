@@ -15,7 +15,6 @@ if ($declaredVersion -notmatch '^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$') {
 }
 
 $target = & (Join-Path $PSScriptRoot 'Get-BuildTarget.ps1')
-
 if ($null -eq $target) {
     $commit = ''
     try {
@@ -58,6 +57,15 @@ if ([string]::IsNullOrWhiteSpace($probeProject)) {
     throw 'A solution exists but no source project was found under src/.'
 }
 
+# A fresh CI runner has no restored NuGet assets yet. Nerdbank.GitVersioning is
+# brought into every project through Directory.Build.props, and its
+# GetBuildVersion target is only available after package restore.
+Write-Host "Restoring version probe project: $probeProject"
+& dotnet restore $probeProject --nologo
+if ($LASTEXITCODE -ne 0) {
+    throw "NuGet restore failed for the NBGV version probe project '$probeProject'."
+}
+
 $tempDir = Join-Path $root 'Documentation\version-probe'
 New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
 $outputPath = Join-Path $tempDir 'ULSAlgorithms.version.txt'
@@ -66,13 +74,14 @@ Remove-Item -LiteralPath $outputPath -Force -ErrorAction SilentlyContinue
 $escapedOutput = $outputPath.Replace('"', '\"')
 & dotnet msbuild $probeProject `
     /nologo `
-    /v:q `
+    /v:minimal `
     /t:WriteULSAlgorithmsVersion `
     "/p:ULSAlgorithmsVersionOutput=$escapedOutput"
 
 if ($LASTEXITCODE -ne 0) {
     throw "Nerdbank.GitVersioning version probe failed for '$probeProject'."
 }
+
 if (-not (Test-Path -LiteralPath $outputPath)) {
     throw 'Version probe did not create its expected output file.'
 }
@@ -84,7 +93,17 @@ foreach ($line in Get-Content -LiteralPath $outputPath) {
     }
 }
 
-$required = @('BuildVersion','BuildVersionSimple','BuildVersion3Components','GitCommitId','GitCommitIdShort','PackageVersion','NuGetPackageVersion','PublicRelease')
+$required = @(
+    'BuildVersion',
+    'BuildVersionSimple',
+    'BuildVersion3Components',
+    'GitCommitId',
+    'GitCommitIdShort',
+    'PackageVersion',
+    'NuGetPackageVersion',
+    'PublicRelease'
+)
+
 foreach ($key in $required) {
     if (-not $map.ContainsKey($key)) {
         throw "Version probe output is missing '$key'."
