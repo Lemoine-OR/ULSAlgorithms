@@ -1,0 +1,31 @@
+<Project>
+  <!--
+    Machine-readable bridge from Nerdbank.GitVersioning to PowerShell,
+    Doxygen and packaging.
+  -->
+  <Target Name="WriteULSAlgorithmsVersion"
+          DependsOnTargets="GetBuildVersion">
+    <PropertyGroup>
+      <ULSAlgorithmsVersionOutput Condition="'$(ULSAlgorithmsVersionOutput)' == ''">$(BaseIntermediateOutputPath)ULSAlgorithms.version.txt</ULSAlgorithmsVersionOutput>
+    </PropertyGroup>
+    <ItemGroup>
+      <_ULSAlgorithmsVersionLine Include="AssemblyVersion=$(AssemblyVersion)" />
+      <_ULSAlgorithmsVersionLine Include="AssemblyFileVersion=$(AssemblyFileVersion)" />
+      <_ULSAlgorithmsVersionLine Include="AssemblyInformationalVersion=$(AssemblyInformationalVersion)" />
+      <_ULSAlgorithmsVersionLine Include="BuildVersion=$(BuildVersion)" />
+      <_ULSAlgorithmsVersionLine Include="BuildVersionSimple=$(BuildVersionSimple)" />
+      <_ULSAlgorithmsVersionLine Include="BuildVersion3Components=$(BuildVersion3Components)" />
+      <_ULSAlgorithmsVersionLine Include="GitCommitId=$(GitCommitId)" />
+      <_ULSAlgorithmsVersionLine Include="GitCommitIdShort=$(GitCommitIdShort)" />
+      <_ULSAlgorithmsVersionLine Include="GitVersionHeight=$(GitVersionHeight)" />
+      <_ULSAlgorithmsVersionLine Include="MajorMinorVersion=$(MajorMinorVersion)" />
+      <_ULSAlgorithmsVersionLine Include="PackageVersion=$(PackageVersion)" />
+      <_ULSAlgorithmsVersionLine Include="NuGetPackageVersion=$(NuGetPackageVersion)" />
+      <_ULSAlgorithmsVersionLine Include="PublicRelease=$(PublicRelease)" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(ULSAlgorithmsVersionOutput)"
+                      Lines="@(_ULSAlgorithmsVersionLine)"
+                      Overwrite="true"
+                      Encoding="UTF-8" />
+  </Target>
+</Project>

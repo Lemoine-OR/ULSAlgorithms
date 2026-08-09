@@ -1,0 +1,53 @@
+<Project>
+  <PropertyGroup>
+    <!-- One version computation is shared by every project below this directory. -->
+    <GitVersionBaseDirectory>$(MSBuildThisFileDirectory)</GitVersionBaseDirectory>
+
+    <!-- Repository/product identity. -->
+    <Authors>David Lemoine</Authors>
+    <Company>Lemoine-OR</Company>
+    <AssemblyCompany>Lemoine-OR</AssemblyCompany>
+    <Product>ULSAlgorithms</Product>
+    <AssemblyProduct>ULSAlgorithms</AssemblyProduct>
+    <Title>$(MSBuildProjectName)</Title>
+    <AssemblyTitle>$(MSBuildProjectName)</AssemblyTitle>
+    <Description Condition="'$(Description)' == ''">$(MSBuildProjectName) component of ULSAlgorithms, developed by David Lemoine (Lemoine-OR).</Description>
+    <Copyright>Copyright © David Lemoine — Lemoine-OR</Copyright>
+
+    <RepositoryUrl>https://github.com/Lemoine-OR/ULSAlgorithms</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/Lemoine-OR/ULSAlgorithms</PackageProjectUrl>
+
+    <!-- Common SDK-style project defaults. Individual projects may override them. -->
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+
+    <!-- NBGV exposes exact build identity to runtime code as ULSAlgorithms.Build.ThisAssembly. -->
+    <NBGV_ThisAssemblyNamespace>ULSAlgorithms.Build</NBGV_ThisAssemblyNamespace>
+    <NBGV_ThisAssemblyIncludesPackageVersion>true</NBGV_ThisAssemblyIncludesPackageVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Pinned deliberately for reproducible builds. -->
+    <PackageReference Include="Nerdbank.GitVersioning"
+                      Version="3.10.70"
+                      PrivateAssets="all"
+                      Condition="!Exists('packages.config')" />
+
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>Author</_Parameter1>
+      <_Parameter2>David Lemoine</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>Organization</_Parameter1>
+      <_Parameter2>Lemoine-OR</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>Repository</_Parameter1>
+      <_Parameter2>https://github.com/Lemoine-OR/ULSAlgorithms</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>

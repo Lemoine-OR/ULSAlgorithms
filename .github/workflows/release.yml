@@ -1,0 +1,178 @@
+name: Create Release
+
+run-name: Release ULSAlgorithms from ${{ github.ref_name }}
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ulsalgorithms-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build, validate and publish release
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      PublicRelease: 'true'
+
+    steps:
+      - name: Require main branch
+        shell: pwsh
+        run: |
+          if ("${{ github.ref }}" -ne "refs/heads/main") {
+            throw "Releases must be started from the main branch."
+          }
+
+      - name: Checkout full Git history
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install Graphviz
+        shell: pwsh
+        run: |
+          choco install graphviz -y --no-progress
+          cmd /c "dot -V 2>&1"
+
+      - name: Install verified official Doxygen 1.17.0
+        shell: pwsh
+        run: |
+          ./tools/Install-Doxygen.ps1
+
+      - name: Automation preflight
+        shell: pwsh
+        run: |
+          ./tools/Test-Automation.ps1
+
+      - name: Full public-release build
+        shell: pwsh
+        run: |
+          $target = ./tools/Get-BuildTarget.ps1
+          if ($null -eq $target) {
+            throw "A release cannot be created before a buildable C# solution/project exists."
+          }
+          ./build/Build-All.ps1
+
+      - name: Prepare and validate release assets
+        id: release_info
+        shell: pwsh
+        run: |
+          $release = ./build/Prepare-ReleaseAssets.ps1
+
+          "version=$($release.ReleaseVersion)" |
+            Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "build_version=$($release.BuildVersion)" |
+            Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "tag=$($release.Tag)" |
+            Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "commit=$($release.CommitId)" |
+            Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "prerelease=$($release.Prerelease.ToString().ToLowerInvariant())" |
+            Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Guard against duplicate tag or release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release_info.outputs.tag }}
+        run: |
+          $remoteTag = & git ls-remote --tags --refs origin "refs/tags/$env:RELEASE_TAG"
+          if ($LASTEXITCODE -ne 0) {
+            throw "Unable to query remote Git tags for '$env:RELEASE_TAG'."
+          }
+          if (-not [string]::IsNullOrWhiteSpace(($remoteTag | Out-String).Trim())) {
+            throw "Git tag '$env:RELEASE_TAG' already exists."
+          }
+
+          & gh release view $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY *> $null
+          if ($LASTEXITCODE -eq 0) {
+            throw "GitHub Release '$env:RELEASE_TAG' already exists."
+          }
+
+          Write-Host "Tag and release are available: $env:RELEASE_TAG"
+
+      - name: Upload release bundle as workflow artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ULSAlgorithms-${{ steps.release_info.outputs.version }}-release-bundle
+          path: Documentation/release
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Publish GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release_info.outputs.tag }}
+          RELEASE_VERSION: ${{ steps.release_info.outputs.version }}
+          RELEASE_PRERELEASE: ${{ steps.release_info.outputs.prerelease }}
+        run: |
+          if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
+            throw "GitHub CLI 'gh' is not available on the runner."
+          }
+
+          $assets = @(
+            Get-ChildItem -LiteralPath "Documentation\release" -File |
+              Sort-Object Name |
+              ForEach-Object { $_.FullName }
+          )
+          if ($assets.Count -eq 0) {
+            throw "No release assets were prepared."
+          }
+
+          $arguments = @(
+            "release",
+            "create",
+            $env:RELEASE_TAG
+          )
+          $arguments += $assets
+          $arguments += @(
+            "--repo",
+            $env:GITHUB_REPOSITORY,
+            "--target",
+            $env:GITHUB_SHA,
+            "--title",
+            "ULSAlgorithms $env:RELEASE_VERSION",
+            "--generate-notes"
+          )
+
+          if ($env:RELEASE_PRERELEASE -eq "true") {
+            $arguments += "--prerelease"
+            $arguments += "--latest=false"
+          }
+
+          & gh @arguments
+          if ($LASTEXITCODE -ne 0) {
+            throw "GitHub Release publication failed."
+          }
+
+      - name: Release summary
+        shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ steps.release_info.outputs.version }}
+          RELEASE_TAG: ${{ steps.release_info.outputs.tag }}
+          BUILD_VERSION: ${{ steps.release_info.outputs.build_version }}
+          RELEASE_COMMIT: ${{ steps.release_info.outputs.commit }}
+          RELEASE_PRERELEASE: ${{ steps.release_info.outputs.prerelease }}
+        run: |
+          @"
+          ## ULSAlgorithms $env:RELEASE_VERSION
+
+          - Tag: $env:RELEASE_TAG
+          - Build version: $env:BUILD_VERSION
+          - Commit: $env:RELEASE_COMMIT
+          - Prerelease: $env:RELEASE_PRERELEASE
+
+          - Binary ZIP, documentation ZIP, build metadata, binary manifest,
+            release manifest and SHA-256 checksums were validated before publication.
+          "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8

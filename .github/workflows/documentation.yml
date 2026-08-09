@@ -1,0 +1,90 @@
+name: Build Documentation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  documentation:
+    name: Build versioned and validated Doxygen documentation
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout full Git history
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Validate PowerShell automation syntax
+        shell: pwsh
+        run: |
+          ./tools/Test-PowerShellSyntax.ps1
+
+      - name: Install Graphviz
+        shell: pwsh
+        run: |
+          choco install graphviz -y --no-progress
+          cmd /c "dot -V 2>&1"
+
+      - name: Install verified official Doxygen 1.17.0
+        shell: pwsh
+        run: |
+          ./tools/Install-Doxygen.ps1
+
+      - name: Build and validate documentation
+        shell: pwsh
+        run: |
+          ./docs/build-documentation.ps1
+
+      - name: Upload complete documentation artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ULSAlgorithms-Documentation
+          path: Documentation/site
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Configure GitHub Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v6
+
+      - name: Upload GitHub Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: Documentation/site
+
+  deploy:
+    name: Deploy documentation to GitHub Pages
+    if: github.event_name != 'pull_request'
+    needs:
+      - documentation
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
