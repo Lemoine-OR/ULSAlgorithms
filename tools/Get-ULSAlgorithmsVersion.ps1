@@ -61,9 +61,10 @@ if ([string]::IsNullOrWhiteSpace($probeProject)) {
 # brought into every project through Directory.Build.props, and its
 # GetBuildVersion target is only available after package restore.
 Write-Host "Restoring version probe project: $probeProject"
-& dotnet restore $probeProject --nologo
-if ($LASTEXITCODE -ne 0) {
-    throw "NuGet restore failed for the NBGV version probe project '$probeProject'."
+& dotnet restore $probeProject --nologo | Out-Host
+$restoreExitCode = $LASTEXITCODE
+if ($restoreExitCode -ne 0) {
+    throw "NuGet restore failed for the NBGV version probe project '$probeProject' (exit code $restoreExitCode)."
 }
 
 $tempDir = Join-Path $root 'Documentation\version-probe'
@@ -76,10 +77,11 @@ $escapedOutput = $outputPath.Replace('"', '\"')
     /nologo `
     /v:minimal `
     /t:WriteULSAlgorithmsVersion `
-    "/p:ULSAlgorithmsVersionOutput=$escapedOutput"
+    "/p:ULSAlgorithmsVersionOutput=$escapedOutput" | Out-Host
 
-if ($LASTEXITCODE -ne 0) {
-    throw "Nerdbank.GitVersioning version probe failed for '$probeProject'."
+$probeExitCode = $LASTEXITCODE
+if ($probeExitCode -ne 0) {
+    throw "Nerdbank.GitVersioning version probe failed for '$probeProject' (exit code $probeExitCode)."
 }
 
 if (-not (Test-Path -LiteralPath $outputPath)) {
