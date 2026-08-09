@@ -96,8 +96,11 @@ public sealed class BahlTajPlanningHorizonSolverTests
         var problem = new UlsProblem(
             [0.0, 10.0],
             [1.0, 100.0],
-            [1.0, 20.0],
+            [1.0, 2.0],
             [1.0, 0.0]);
+
+        Assert.True(
+            BahlTajPlanningHorizonSolver.IsApplicable(problem));
 
         var result =
             new BahlTajPlanningHorizonSolver().Solve(
@@ -125,8 +128,11 @@ public sealed class BahlTajPlanningHorizonSolverTests
         var problem = new UlsProblem(
             [0.0, 0.0, 0.0, 0.0],
             [10.0, 20.0, 30.0, 40.0],
-            [8.0, 2.0, 12.0, 1.0],
+            [8.0, 7.0, 6.0, 5.0],
             [2.0, 3.0, 4.0, 0.0]);
+
+        Assert.True(
+            BahlTajPlanningHorizonSolver.IsApplicable(problem));
 
         var result =
             new BahlTajPlanningHorizonSolver().Solve(
