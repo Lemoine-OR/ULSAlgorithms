@@ -1,0 +1,493 @@
+using ULSAlgorithms.Abstractions;
+using ULSAlgorithms.Exact.AggarwalPark;
+using ULSAlgorithms.Exact.FedergruenTzur;
+using ULSAlgorithms.Exact.Wagelmans;
+using ULSAlgorithms.Exact.WagnerWhitin;
+using ULSAlgorithms.Models;
+using ULSAlgorithms.Results;
+using ULSAlgorithms.Tests.Exact.WagnerWhitin;
+using Xunit;
+
+namespace ULSAlgorithms.Tests.Exact.AggarwalPark;
+
+public sealed class AggarwalParkSolverTests
+{
+    [Fact]
+    public void Solver_ImplementsCommonStrategyContract()
+    {
+        IUlsSolver solver =
+            new AggarwalParkSolver();
+
+        Assert.Equal(
+            UlsSolverKind.Exact,
+            solver.Kind);
+
+        Assert.Equal(
+            "Aggarwal-Park Monge matrix search O(n log n)",
+            solver.Name);
+    }
+
+    [Fact]
+    public void PublishedWagelmansExample_Returns864()
+    {
+        double[] demands =
+        [
+            69.0, 29.0, 36.0, 61.0, 61.0, 26.0,
+            34.0, 67.0, 45.0, 67.0, 79.0, 56.0
+        ];
+
+        double[] setupCosts =
+        [
+            85.0, 102.0, 102.0, 101.0, 98.0, 114.0,
+            105.0, 86.0, 119.0, 110.0, 98.0, 114.0
+        ];
+
+        var problem = new UlsProblem(
+            demands,
+            setupCosts,
+            new double[12],
+            Enumerable.Repeat(1.0, 12).ToArray());
+
+        var token =
+            TestContext.Current.CancellationToken;
+
+        var result =
+            new AggarwalParkSolver().Solve(
+                problem,
+                token);
+
+        Assert.Equal(
+            UlsSolveStatus.Optimal,
+            result.Status);
+
+        AssertClose(
+            864.0,
+            result.ObjectiveValue!.Value);
+    }
+
+    [Fact]
+    public void StronglyNonmonotoneGeneralCosts_MatchOracle()
+    {
+        var problem = new UlsProblem(
+            [6.0, 0.0, 8.0, 5.0, 9.0, 3.0],
+            [18.0, 31.0, 12.0, 22.0, 15.0, 19.0],
+            [20.0, 1.0, 18.0, 2.0, 16.0, 3.0],
+            [1.0, 4.0, 1.0, 5.0, 2.0, 0.0]);
+
+        var token =
+            TestContext.Current.CancellationToken;
+
+        var expected =
+            QuadraticWagnerWhitinOracle.GetOptimalCost(
+                problem,
+                token);
+
+        var result =
+            new AggarwalParkSolver().Solve(
+                problem,
+                token);
+
+        AssertClose(
+            expected,
+            result.ObjectiveValue!.Value);
+    }
+
+    [Fact]
+    public void ZeroDemandProductionPeriod_IsHandled()
+    {
+        var problem = new UlsProblem(
+            [0.0, 10.0],
+            [1.0, 100.0],
+            [1.0, 20.0],
+            [1.0, 0.0]);
+
+        var result =
+            new AggarwalParkSolver().Solve(
+                problem,
+                TestContext.Current.CancellationToken);
+
+        Assert.NotNull(result.Solution);
+
+        AssertClose(
+            21.0,
+            result.Solution.TotalCost);
+
+        Assert.Equal(
+            [true, false],
+            result.Solution.SetupDecisions.ToArray());
+
+        Assert.Equal(
+            [10.0, 0.0],
+            result.Solution.ProductionQuantities.ToArray());
+    }
+
+    [Fact]
+    public void AllZeroDemand_ReturnsZeroWithoutSetups()
+    {
+        var problem = new UlsProblem(
+            [0.0, 0.0, 0.0, 0.0, 0.0],
+            [10.0, 20.0, 30.0, 40.0, 50.0],
+            [20.0, 1.0, 18.0, 2.0, 16.0],
+            [4.0, 3.0, 2.0, 1.0, 0.0]);
+
+        var result =
+            new AggarwalParkSolver().Solve(
+                problem,
+                TestContext.Current.CancellationToken);
+
+        Assert.NotNull(result.Solution);
+
+        AssertClose(
+            0.0,
+            result.Solution.TotalCost);
+
+        Assert.DoesNotContain(
+            true,
+            result.Solution.SetupDecisions.ToArray());
+    }
+
+    [Fact]
+    public void RandomGeneralInstances_MatchOracleAndOtherGeneralSolvers()
+    {
+        var token =
+            TestContext.Current.CancellationToken;
+
+        var random =
+            new Random(19930601);
+
+        var aggarwalPark =
+            new AggarwalParkSolver();
+
+        var wagelmans =
+            new WagelmansGeneralSolver();
+
+        var federgruenTzur =
+            new FedergruenTzurSolver();
+
+        var evans =
+            new WagnerWhitinEvansSolver();
+
+        const int instanceCount = 3_000;
+
+        for (var instance = 0;
+             instance < instanceCount;
+             instance++)
+        {
+            token.ThrowIfCancellationRequested();
+
+            var horizon =
+                random.Next(1, 51);
+
+            var demands =
+                new double[horizon];
+
+            var setupCosts =
+                new double[horizon];
+
+            var productionCosts =
+                new double[horizon];
+
+            var holdingCosts =
+                new double[horizon];
+
+            for (var period = 0;
+                 period < horizon;
+                 period++)
+            {
+                demands[period] =
+                    random.Next(0, 41);
+
+                setupCosts[period] =
+                    random.Next(0, 151);
+
+                productionCosts[period] =
+                    random.Next(0, 61);
+
+                holdingCosts[period] =
+                    random.Next(0, 16);
+            }
+
+            var problem =
+                new UlsProblem(
+                    demands,
+                    setupCosts,
+                    productionCosts,
+                    holdingCosts);
+
+            var expected =
+                QuadraticWagnerWhitinOracle.GetOptimalCost(
+                    problem,
+                    token);
+
+            var a =
+                aggarwalPark
+                    .Solve(problem, token)
+                    .ObjectiveValue!.Value;
+
+            var b =
+                wagelmans
+                    .Solve(problem, token)
+                    .ObjectiveValue!.Value;
+
+            var c =
+                federgruenTzur
+                    .Solve(problem, token)
+                    .ObjectiveValue!.Value;
+
+            var d =
+                evans
+                    .Solve(problem, token)
+                    .ObjectiveValue!.Value;
+
+            AssertClose(
+                expected,
+                a,
+                $"Aggarwal-Park instance {instance}");
+
+            AssertClose(
+                expected,
+                b,
+                $"Wagelmans instance {instance}");
+
+            AssertClose(
+                expected,
+                c,
+                $"Federgruen-Tzur instance {instance}");
+
+            AssertClose(
+                expected,
+                d,
+                $"Evans instance {instance}");
+        }
+    }
+
+    [Fact]
+    public void ZeroDemandHeavyRandomInstances_MatchQuadraticOracle()
+    {
+        var token =
+            TestContext.Current.CancellationToken;
+
+        var random =
+            new Random(930549);
+
+        var solver =
+            new AggarwalParkSolver();
+
+        const int instanceCount = 1_000;
+
+        for (var instance = 0;
+             instance < instanceCount;
+             instance++)
+        {
+            token.ThrowIfCancellationRequested();
+
+            var horizon =
+                random.Next(1, 81);
+
+            var demands =
+                new double[horizon];
+
+            var setupCosts =
+                new double[horizon];
+
+            var productionCosts =
+                new double[horizon];
+
+            var holdingCosts =
+                new double[horizon];
+
+            for (var period = 0;
+                 period < horizon;
+                 period++)
+            {
+                demands[period] =
+                    random.NextDouble() < 0.65
+                        ? 0.0
+                        : random.Next(1, 31);
+
+                setupCosts[period] =
+                    random.Next(0, 101);
+
+                productionCosts[period] =
+                    random.Next(0, 41);
+
+                holdingCosts[period] =
+                    random.Next(0, 11);
+            }
+
+            var problem =
+                new UlsProblem(
+                    demands,
+                    setupCosts,
+                    productionCosts,
+                    holdingCosts);
+
+            var expected =
+                QuadraticWagnerWhitinOracle.GetOptimalCost(
+                    problem,
+                    token);
+
+            var actual =
+                solver
+                    .Solve(problem, token)
+                    .ObjectiveValue!.Value;
+
+            AssertClose(
+                expected,
+                actual,
+                $"zero-demand-heavy instance {instance}");
+        }
+    }
+
+    [Fact]
+    public void NoSpeculativeInstances_MatchLinearSolvers()
+    {
+        var token =
+            TestContext.Current.CancellationToken;
+
+        var random =
+            new Random(19930549);
+
+        var aggarwalPark =
+            new AggarwalParkSolver();
+
+        var wagelmansLinear =
+            new WagnerWhitinSolver();
+
+        var federgruenLinear =
+            new FedergruenTzurNoSpeculativeMotiveSolver();
+
+        const int instanceCount = 1_000;
+
+        for (var instance = 0;
+             instance < instanceCount;
+             instance++)
+        {
+            token.ThrowIfCancellationRequested();
+
+            var horizon =
+                random.Next(1, 101);
+
+            var demands =
+                new double[horizon];
+
+            var setupCosts =
+                new double[horizon];
+
+            var productionCosts =
+                new double[horizon];
+
+            var holdingCosts =
+                new double[horizon];
+
+            for (var period = 0;
+                 period < horizon;
+                 period++)
+            {
+                demands[period] =
+                    random.Next(0, 31);
+
+                setupCosts[period] =
+                    random.Next(0, 101);
+
+                holdingCosts[period] =
+                    random.Next(0, 11);
+            }
+
+            productionCosts[0] =
+                random.Next(0, 21);
+
+            for (var period = 1;
+                 period < horizon;
+                 period++)
+            {
+                var upperBound =
+                    (int)(
+                        productionCosts[period - 1] +
+                        holdingCosts[period - 1]);
+
+                productionCosts[period] =
+                    random.Next(
+                        0,
+                        upperBound + 1);
+            }
+
+            var problem =
+                new UlsProblem(
+                    demands,
+                    setupCosts,
+                    productionCosts,
+                    holdingCosts);
+
+            var a =
+                aggarwalPark
+                    .Solve(problem, token)
+                    .ObjectiveValue!.Value;
+
+            var b =
+                wagelmansLinear
+                    .Solve(problem, token)
+                    .ObjectiveValue!.Value;
+
+            var c =
+                federgruenLinear
+                    .Solve(problem, token)
+                    .ObjectiveValue!.Value;
+
+            AssertClose(
+                a,
+                b,
+                $"Wagelmans-linear instance {instance}");
+
+            AssertClose(
+                a,
+                c,
+                $"Federgruen-linear instance {instance}");
+        }
+    }
+
+    [Fact]
+    public void Solve_HonorsCancellation()
+    {
+        var problem =
+            new UlsProblem(
+                [1.0, 2.0, 3.0],
+                [10.0, 10.0, 10.0],
+                [8.0, 1.0, 9.0],
+                [1.0, 1.0, 0.0]);
+
+        using var cancellation =
+            new CancellationTokenSource();
+
+        cancellation.Cancel();
+
+        Assert.Throws<OperationCanceledException>(() =>
+            new AggarwalParkSolver().Solve(
+                problem,
+                cancellation.Token));
+    }
+
+    private static void AssertClose(
+        double expected,
+        double actual,
+        string? context = null)
+    {
+        var scale =
+            Math.Max(
+                1.0,
+                Math.Max(
+                    Math.Abs(expected),
+                    Math.Abs(actual)));
+
+        var tolerance =
+            1e-10 * scale;
+
+        Assert.True(
+            Math.Abs(expected - actual) <= tolerance,
+            $"Expected {expected:R}, actual {actual:R}, " +
+            $"tolerance {tolerance:R}" +
+            (context is null
+                ? string.Empty
+                : $", {context}."));
+    }
+}
