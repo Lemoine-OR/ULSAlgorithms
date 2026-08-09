@@ -19,7 +19,6 @@ jobs:
     timeout-minutes: 45
     env:
       PublicRelease: 'true'
-
     steps:
       - name: Require main branch
         shell: pwsh
@@ -38,11 +37,10 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Install Graphviz
+      - name: Install verified official Graphviz 15.1.1
         shell: pwsh
         run: |
-          choco install graphviz -y --no-progress
-          cmd /c "dot -V 2>&1"
+          ./tools/Install-Graphviz.ps1
 
       - name: Install verified official Doxygen 1.17.0
         shell: pwsh
@@ -68,7 +66,6 @@ jobs:
         shell: pwsh
         run: |
           $release = ./build/Prepare-ReleaseAssets.ps1
-
           "version=$($release.ReleaseVersion)" |
             Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
           "build_version=$($release.BuildVersion)" |
@@ -93,7 +90,6 @@ jobs:
           if (-not [string]::IsNullOrWhiteSpace(($remoteTag | Out-String).Trim())) {
             throw "Git tag '$env:RELEASE_TAG' already exists."
           }
-
           $encodedTag = [System.Uri]::EscapeDataString($env:RELEASE_TAG)
           $releaseUri = "https://api.github.com/repos/$env:GITHUB_REPOSITORY/releases/tags/$encodedTag"
           $headers = @{
@@ -101,7 +97,6 @@ jobs:
             Accept = "application/vnd.github+json"
             "X-GitHub-Api-Version" = "2022-11-28"
           }
-
           $releaseResponse = Invoke-WebRequest `
             -Uri $releaseUri `
             -Headers $headers `
@@ -114,7 +109,6 @@ jobs:
           if ($releaseResponse.StatusCode -ne 404) {
             throw "Unable to query GitHub Release '$env:RELEASE_TAG'. HTTP status: $($releaseResponse.StatusCode)."
           }
-
           Write-Host "Tag and release are available: $env:RELEASE_TAG"
 
       - name: Upload release bundle as workflow artifact
@@ -136,7 +130,6 @@ jobs:
           if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
             throw "GitHub CLI 'gh' is not available on the runner."
           }
-
           $assets = @(
             Get-ChildItem -LiteralPath "Documentation\release" -File |
               Sort-Object Name |
@@ -145,7 +138,6 @@ jobs:
           if ($assets.Count -eq 0) {
             throw "No release assets were prepared."
           }
-
           $arguments = @(
             "release",
             "create",
@@ -161,7 +153,6 @@ jobs:
             "ULSAlgorithms $env:RELEASE_VERSION",
             "--generate-notes"
           )
-
           if ($env:RELEASE_PRERELEASE -eq "true") {
             $arguments += "--prerelease"
             $arguments += "--latest=false"
@@ -183,7 +174,6 @@ jobs:
         run: |
           @"
           ## ULSAlgorithms $env:RELEASE_VERSION
-
           - Tag: $env:RELEASE_TAG
           - Build version: $env:BUILD_VERSION
           - Commit: $env:RELEASE_COMMIT

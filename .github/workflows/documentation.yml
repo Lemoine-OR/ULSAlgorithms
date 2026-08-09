@@ -39,11 +39,10 @@ jobs:
         run: |
           ./tools/Test-PowerShellSyntax.ps1
 
-      - name: Install Graphviz
+      - name: Install verified official Graphviz 15.1.1
         shell: pwsh
         run: |
-          choco install graphviz -y --no-progress
-          cmd /c "dot -V 2>&1"
+          ./tools/Install-Graphviz.ps1
 
       - name: Install verified official Doxygen 1.17.0
         shell: pwsh
@@ -79,7 +78,6 @@ jobs:
     needs:
       - documentation
     runs-on: ubuntu-latest
-
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
