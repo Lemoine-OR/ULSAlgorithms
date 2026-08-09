@@ -94,9 +94,25 @@ jobs:
             throw "Git tag '$env:RELEASE_TAG' already exists."
           }
 
-          & gh release view $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY *> $null
-          if ($LASTEXITCODE -eq 0) {
+          $encodedTag = [System.Uri]::EscapeDataString($env:RELEASE_TAG)
+          $releaseUri = "https://api.github.com/repos/$env:GITHUB_REPOSITORY/releases/tags/$encodedTag"
+          $headers = @{
+            Authorization = "Bearer $env:GH_TOKEN"
+            Accept = "application/vnd.github+json"
+            "X-GitHub-Api-Version" = "2022-11-28"
+          }
+
+          $releaseResponse = Invoke-WebRequest `
+            -Uri $releaseUri `
+            -Headers $headers `
+            -Method Get `
+            -SkipHttpErrorCheck
+
+          if ($releaseResponse.StatusCode -eq 200) {
             throw "GitHub Release '$env:RELEASE_TAG' already exists."
+          }
+          if ($releaseResponse.StatusCode -ne 404) {
+            throw "Unable to query GitHub Release '$env:RELEASE_TAG'. HTTP status: $($releaseResponse.StatusCode)."
           }
 
           Write-Host "Tag and release are available: $env:RELEASE_TAG"
