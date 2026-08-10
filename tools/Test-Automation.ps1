@@ -15,10 +15,13 @@ $required = @(
     'build/Package-ValidatedBinaries.ps1',
     'build/Prepare-ReleaseAssets.ps1',
     'docs/Doxyfile',
+    'docs/algorithm-catalog.json',
     'docs/build-documentation.ps1',
     'tools/Install-Doxygen.ps1',
     'tools/Get-ULSAlgorithmsVersion.ps1',
-    'tools/Test-ReleaseArtifacts.ps1'
+    'tools/Test-ReleaseArtifacts.ps1',
+    'tools/Test-SolverCatalog.ps1',
+    'tools/ULSAlgorithms.CatalogExporter/ULSAlgorithms.CatalogExporter.csproj'
 )
 
 foreach ($relative in $required) {
@@ -44,6 +47,8 @@ else {
     Write-Host "Build target detected: $($target.Path)"
     $version = & (Join-Path $PSScriptRoot 'Get-ULSAlgorithmsVersion.ps1')
     Write-Host "NBGV package version: $($version.PackageVersion)"
+
+    & (Join-Path $PSScriptRoot 'Test-SolverCatalog.ps1')
 }
 
 Write-Host 'Automation preflight passed.'

@@ -8,6 +8,7 @@ The generated API reference is the advanced layer of the documentation. For norm
 
 - @subpage getting_started — create a problem, choose an algorithm, solve it.
 - @subpage simple_api — the small common API used by every algorithm.
+- @subpage solver_catalog_factory — browse and instantiate strategies through stable identifiers.
 - @subpage method_families — understand the four method families currently available.
 
 ## Browse methods

@@ -39,6 +39,11 @@ jobs:
         run: |
           ./tools/Test-PowerShellSyntax.ps1
 
+      - name: Validate runtime solver catalog projection
+        shell: pwsh
+        run: |
+          ./tools/Test-SolverCatalog.ps1
+
       - name: Install verified official Graphviz 15.1.1
         shell: pwsh
         run: |

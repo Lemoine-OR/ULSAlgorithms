@@ -36,6 +36,8 @@ Periods are zero-based. Backlogging is not allowed and initial inventory is zero
 
 ## 2. Choose an algorithm
 
+You can instantiate a concrete strategy directly:
+
 ```csharp
 using ULSAlgorithms.Abstractions;
 using ULSAlgorithms.Exact.WagnerWhitin;
@@ -43,7 +45,21 @@ using ULSAlgorithms.Exact.WagnerWhitin;
 IUlsSolver solver = new WagnerWhitinSolver();
 ```
 
-Every public algorithm implements the same `IUlsSolver` contract. Changing method therefore changes only the instantiated class.
+Or use the stable runtime catalog/factory introduced in v0.26.0:
+
+```csharp
+using ULSAlgorithms.Abstractions;
+using ULSAlgorithms.Catalog;
+
+IUlsSolver solver =
+    UlsSolverFactory.Create("adaptive-exact");
+```
+
+The factory is useful for configuration files, command-line tools, experiment
+campaigns and user interfaces because client code does not need a compile-time
+switch over concrete strategy classes.
+
+Every public algorithm still implements the same `IUlsSolver` contract.
 
 ## 3. Solve
 
@@ -70,6 +86,7 @@ Exact methods may return `Optimal`. Heuristics return `Feasible` because they do
 ## What should I read next?
 
 - Need an algorithm: use the card-based documentation home page.
+- Need runtime discovery/factory creation: see @ref solver_catalog_factory.
 - Need to understand inputs/results: see @ref simple_api.
 - Need complexity or assumptions: see @ref complexity_applicability.
 - Need every class/member: use the generated API tabs.
