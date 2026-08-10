@@ -12,10 +12,29 @@ public sealed class LsCuttingPlaneOptions
         100;
 
     /// <summary>
-    /// Gets or sets the positive violation required before a cut is added.
+    /// Gets or sets the positive violation required before a cut is eligible.
     /// </summary>
     public double ViolationTolerance { get; set; } =
         1.0e-7;
+
+    /// <summary>
+    /// Gets or sets the minimum efficacy required before a cut is eligible.
+    /// The default zero preserves v0.20.0 behavior.
+    /// </summary>
+    public double MinimumEfficacy { get; set; }
+
+    /// <summary>
+    /// Gets or sets the cut-pool selection policy.
+    /// </summary>
+    public CutSelectionPolicy SelectionPolicy { get; set; } =
+        CutSelectionPolicy.AllViolated;
+
+    /// <summary>
+    /// Gets or sets the maximum number of cuts selected per iteration when the
+    /// policy is TopByViolation or TopByEfficacy.
+    /// </summary>
+    public int MaximumCutsPerIteration { get; set; } =
+        25;
 
     /// <summary>Validates this option set.</summary>
     public void EnsureValid()
@@ -31,6 +50,25 @@ public sealed class LsCuttingPlaneOptions
         {
             throw new InvalidOperationException(
                 "ViolationTolerance must be finite and non-negative.");
+        }
+
+        if (!double.IsFinite(MinimumEfficacy) ||
+            MinimumEfficacy < 0.0)
+        {
+            throw new InvalidOperationException(
+                "MinimumEfficacy must be finite and non-negative.");
+        }
+
+        if (!Enum.IsDefined(SelectionPolicy))
+        {
+            throw new InvalidOperationException(
+                "SelectionPolicy is not a supported cut-selection policy.");
+        }
+
+        if (MaximumCutsPerIteration <= 0)
+        {
+            throw new InvalidOperationException(
+                "MaximumCutsPerIteration must be strictly positive.");
         }
     }
 }

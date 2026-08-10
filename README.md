@@ -28,119 +28,69 @@
 **ULSAlgorithms** is a research-oriented C# library for deterministic
 **Uncapacitated Lot-Sizing (ULS)**.
 
-The library now contains:
+The library currently contains:
 
-- **16 direct/native exact algorithms**;
-- **4 solver-backed exact formulation strategies**;
-- **2 exact `(l,S)` cutting-plane strategies**;
-- **22 exact `IUlsSolver` strategies in total**;
+- **22 exact `IUlsSolver` strategies**;
 - **11 heuristics**;
 - **33 public solving strategies**;
+- four mathematical-programming formulations;
+- general and Wagner–Whitin `(l,S)` cutting-plane solvers;
 - automatic **CPLEX → Gurobi → Xpress → CBC** discovery;
-- solver-independent mathematical formulations and execution;
-- numerical normalization and two-level independent checking;
-- complete cut-generation traceability.
+- numerical normalization and independent solution checking;
+- cut-pool policies, convergence statistics and BenchmarkDotNet separator
+  benchmarks.
 
 Developed and maintained by **David Lemoine — Lemoine-OR**.
 
-## Classical `(l,S)` cutting planes
+## Cutting-plane engineering
 
-v0.20.0 adds two separate exact strategies:
-
-```text
-GeneralLsCuttingPlaneSolver
-WagnerWhitinLsCuttingPlaneSolver
-```
-
-The general separator performs exact combinatorial separation over the
-classical exponential `(l,S)` family in O(T²) time by selecting, for every
-period, the smaller of the production term and the setup-covered-demand term.
-
-The Wagner-Whitin separator scans the O(T²) prefix-S specialization equivalent
-to:
+v0.21.0 adds configurable root cut-pool strategies:
 
 ```text
-I[k-1] + Σ(j=k..l) d[j,l] y[j] >= d[k,l]
+AllViolated
+MostViolatedPerL
+TopByViolation
+TopByEfficacy
 ```
 
-and requires the no-speculative-motive cost condition.
-
-## Use
+Example:
 
 ```csharp
-IUlsSolver solver =
-    new GeneralLsCuttingPlaneSolver();
-
-UlsSolveResult result =
-    solver.Solve(problem);
-```
-
-or asynchronously:
-
-```csharp
-IAsyncUlsSolver solver =
-    new WagnerWhitinLsCuttingPlaneSolver();
-
-UlsSolveResult result =
-    await solver.SolveAsync(
-        problem,
-        cancellationToken);
-```
-
-## See every generated constraint
-
-```csharp
-if (result is CuttingPlaneUlsSolveResult r)
-{
-    foreach (CutRecord cut in
-             r.CuttingPlaneExecution.Cuts.Cuts)
+var cuts =
+    new LsCuttingPlaneOptions
     {
-        Console.WriteLine(
-            $"{cut.Iteration} | " +
-            $"{cut.Definition} | " +
-            $"{cut.Disposition} | " +
-            $"{cut.DispositionReason}");
-    }
-}
+        SelectionPolicy =
+            CutSelectionPolicy.TopByViolation,
+        MaximumCutsPerIteration =
+            20,
+        MinimumEfficacy =
+            1e-4
+    };
+
+IUlsSolver solver =
+    new GeneralLsCuttingPlaneSolver(
+        cuttingPlaneOptions: cuts);
 ```
 
-Each record retains `l`, `S`, coefficients, RHS, sense, violation, efficacy,
-iteration, disposition and the exact row name inserted into the portable model.
+Every generated cut remains traceable. Eligible cuts rejected only because of
+the pool policy receive `CutDisposition.NotSelected`.
 
-## Exact architecture
+## Convergence
 
-```text
-root aggregate LP
-    ↓
-(l,S) separation
-    ↓
-add unique violated cuts
-    ↓
-repeat
-    ↓
-strengthened final MILP
-    ↓
-UlsSolution reconstruction
-    ↓
-independent ULS checker
-```
+`CuttingPlaneExecutionReport.Convergence` provides root bound evolution,
+LP/separation time, candidate counts, selected/added cuts, final MILP objective
+and the fraction of the initial root gap closed by `(l,S)` cuts.
 
-The final MILP uses the same solver selected during root separation. Automatic
-priority remains CPLEX, Gurobi, Xpress, CBC.
+## Benchmarks
 
-## Scientific provenance
+`LsSeparationBenchmarks` compares the pure general and Wagner–Whitin separators
+for horizons 50, 100, 250 and 500, independently of external solver time.
 
-Main `(l,S)` references:
+## Exactness
 
-- Barany, Van Roy & Wolsey (1984),
-  *Uncapacitated lot-sizing: the convex hull of solutions*,
-  DOI `10.1007/BFb0121006`.
-- Barany, Van Roy & Wolsey (1984),
-  *Strong Formulations for Multi-Item Capacitated Lot Sizing*,
-  DOI `10.1287/mnsc.30.10.1255`.
-- Pochet & Wolsey (1994),
-  *Polyhedra for lot-sizing with Wagner-Whitin costs*,
-  DOI `10.1007/BF01582225`.
+Selection policies affect root strengthening only. The final model restores
+binary setup variables and is solved exactly with the same selected
+optimization engine.
 
 ---
 

@@ -21,5 +21,11 @@ public enum CutDisposition
     Invalid = 4,
 
     /// <summary>The solver adapter refused or failed to add the constraint.</summary>
-    SolverRejected = 5
+    SolverRejected = 5,
+
+    /// <summary>
+    /// The cut was eligible and violated but was deliberately not selected by
+    /// the configured cut-pool policy.
+    /// </summary>
+    NotSelected = 6
 }

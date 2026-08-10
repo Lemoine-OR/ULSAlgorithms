@@ -28,7 +28,6 @@ public abstract class LsCuttingPlaneSolverBase :
     private readonly LinearModelSolveOptions _executionOptions;
     private readonly LsCuttingPlaneOptions _cuttingPlaneOptions;
 
-    /// <summary>Initializes a cutting-plane strategy.</summary>
     protected LsCuttingPlaneSolverBase(
         string name,
         ILsCutSeparator separator,
@@ -44,39 +43,30 @@ public abstract class LsCuttingPlaneSolverBase :
         }
 
         Name = name.Trim();
-
         _separator =
             separator ??
-            throw new ArgumentNullException(
-                nameof(separator));
-
+            throw new ArgumentNullException(nameof(separator));
         _modelSolver =
             modelSolver ??
             new LinearModelSolver();
-
         _executionOptions =
             CloneExecutionOptions(
                 executionOptions ??
                 new LinearModelSolveOptions());
-
         _cuttingPlaneOptions =
             CloneCuttingPlaneOptions(
                 cuttingPlaneOptions ??
                 new LsCuttingPlaneOptions());
     }
 
-    /// <inheritdoc />
     public string Name { get; }
 
-    /// <inheritdoc />
     public UlsSolverKind Kind =>
         UlsSolverKind.Exact;
 
-    /// <summary>Gets the separation method.</summary>
     public CutSeparationMethod SeparationMethod =>
         _separator.Method;
 
-    /// <summary>Tests separator applicability.</summary>
     public bool IsApplicable(
         UlsProblem problem)
     {
@@ -84,7 +74,6 @@ public abstract class LsCuttingPlaneSolverBase :
         return _separator.IsApplicable(problem);
     }
 
-    /// <inheritdoc />
     public UlsSolveResult Solve(
         UlsProblem problem,
         CancellationToken cancellationToken = default)
@@ -103,7 +92,6 @@ public abstract class LsCuttingPlaneSolverBase :
             .GetResult();
     }
 
-    /// <inheritdoc />
     public async ValueTask<UlsSolveResult> SolveAsync(
         UlsProblem problem,
         CancellationToken cancellationToken = default)
@@ -121,8 +109,7 @@ public abstract class LsCuttingPlaneSolverBase :
             new AggregateInventoryFormulationBuilder();
 
         UlsFormulation aggregate =
-            formulationBuilder.Build(
-                problem);
+            formulationBuilder.Build(problem);
 
         LinearModel currentLp =
             LsCutModelBuilder.CreateLpRelaxation(
@@ -138,12 +125,12 @@ public abstract class LsCuttingPlaneSolverBase :
         var iterationReports =
             new List<CutIterationReport>();
 
+        var convergenceIterations =
+            new List<CuttingPlaneIterationStatistics>();
+
         int sequence = 0;
 
         SolverExecutionInfo? selectedSolver =
-            null;
-
-        LinearModelSolveResult? lastLpExecution =
             null;
 
         for (int iteration = 0;
@@ -154,33 +141,33 @@ public abstract class LsCuttingPlaneSolverBase :
 
             LinearModelSolveOptions iterationOptions =
                 selectedSolver is null
-                    ? CloneExecutionOptions(
-                        _executionOptions)
+                    ? CloneExecutionOptions(_executionOptions)
                     : CreatePinnedExecutionOptions(
                         _executionOptions,
                         selectedSolver.SelectedSolver);
 
-            lastLpExecution =
+            LinearModelSolveResult lpExecution =
                 await _modelSolver.SolveAsync(
                     currentLp,
                     iterationOptions,
                     cancellationToken)
                 .ConfigureAwait(false);
 
-            if (lastLpExecution.Solver is not null &&
+            if (lpExecution.Solver is not null &&
                 selectedSolver is null)
             {
                 selectedSolver =
-                    lastLpExecution.Solver;
+                    lpExecution.Solver;
             }
 
-            if (!lastLpExecution.HasFeasibleSolution)
+            if (!lpExecution.HasFeasibleSolution ||
+                !lpExecution.ObjectiveValue.HasValue)
             {
                 return BuildEarlyFailure(
-                    aggregate,
-                    lastLpExecution,
+                    lpExecution,
                     selectedSolver,
                     iterationReports,
+                    convergenceIterations,
                     "Root LP relaxation could not be solved to a valid " +
                     "feasible point.");
             }
@@ -192,7 +179,7 @@ public abstract class LsCuttingPlaneSolverBase :
                 _separator.Separate(
                     problem,
                     aggregate,
-                    lastLpExecution.VariableValues);
+                    lpExecution.VariableValues);
 
             stopwatch.Stop();
 
@@ -200,36 +187,115 @@ public abstract class LsCuttingPlaneSolverBase :
                 new List<CutRecord>(
                     candidates.Count);
 
-            var newlyAdded =
-                new List<(string Name, LsCutDefinition Cut)>();
+            var eligibleIndices =
+                new List<int>();
 
-            foreach (LsSeparatedCut candidate in candidates)
+            var preDisposition =
+                new Dictionary<int, (CutDisposition Disposition, string Reason)>();
+
+            var keys =
+                new string[candidates.Count];
+
+            var seenThisIteration =
+                new HashSet<string>(
+                    StringComparer.Ordinal);
+
+            for (int index = 0;
+                 index < candidates.Count;
+                 index++)
             {
+                LsSeparatedCut candidate =
+                    candidates[index];
+
                 string key =
                     LsCutKey.Create(
                         candidate.Definition);
 
-                CutDisposition disposition;
-                string reason;
-                string rowName = string.Empty;
+                keys[index] = key;
 
                 if (candidate.Violation <=
                     _cuttingPlaneOptions.ViolationTolerance)
                 {
-                    disposition =
-                        CutDisposition.BelowTolerance;
+                    preDisposition[index] =
+                        (
+                            CutDisposition.BelowTolerance,
+                            $"Violation {candidate.Violation:G17} <= " +
+                            $"tolerance " +
+                            $"{_cuttingPlaneOptions.ViolationTolerance:G17}."
+                        );
 
-                    reason =
-                        $"Violation {candidate.Violation:G17} <= tolerance " +
-                        $"{_cuttingPlaneOptions.ViolationTolerance:G17}.";
+                    continue;
                 }
-                else if (!knownCuts.Add(key))
+
+                if (candidate.Efficacy <
+                    _cuttingPlaneOptions.MinimumEfficacy)
+                {
+                    preDisposition[index] =
+                        (
+                            CutDisposition.NotSelected,
+                            $"Efficacy {candidate.Efficacy:G17} < minimum " +
+                            $"{_cuttingPlaneOptions.MinimumEfficacy:G17}."
+                        );
+
+                    continue;
+                }
+
+                if (knownCuts.Contains(key) ||
+                    !seenThisIteration.Add(key))
+                {
+                    preDisposition[index] =
+                        (
+                            CutDisposition.Duplicate,
+                            "An equivalent (l,S) cut is already present."
+                        );
+
+                    continue;
+                }
+
+                eligibleIndices.Add(index);
+            }
+
+            HashSet<int> selectedIndices =
+                LsCutSelector.Select(
+                    candidates,
+                    eligibleIndices,
+                    _cuttingPlaneOptions);
+
+            var newlyAdded =
+                new List<(string Name, LsCutDefinition Cut)>();
+
+            int selectedCount = 0;
+
+            for (int index = 0;
+                 index < candidates.Count;
+                 index++)
+            {
+                LsSeparatedCut candidate =
+                    candidates[index];
+
+                CutDisposition disposition;
+                string reason;
+                string rowName =
+                    string.Empty;
+
+                if (preDisposition.TryGetValue(
+                        index,
+                        out var prior))
                 {
                     disposition =
-                        CutDisposition.Duplicate;
+                        prior.Disposition;
 
                     reason =
-                        "An equivalent (l,S) cut was already added.";
+                        prior.Reason;
+                }
+                else if (!selectedIndices.Contains(index))
+                {
+                    disposition =
+                        CutDisposition.NotSelected;
+
+                    reason =
+                        $"Eligible violated cut not selected by policy " +
+                        $"'{_cuttingPlaneOptions.SelectionPolicy}'.";
                 }
                 else
                 {
@@ -240,7 +306,13 @@ public abstract class LsCuttingPlaneSolverBase :
                         $"ls_{_separator.Method}_{iteration}_{sequence}";
 
                     reason =
-                        "Violated unique cut added to the portable LP model.";
+                        $"Selected by '{_cuttingPlaneOptions.SelectionPolicy}' " +
+                        "and added to the portable LP model.";
+
+                    selectedCount++;
+
+                    knownCuts.Add(
+                        keys[index]);
 
                     newlyAdded.Add(
                         (rowName, candidate.Definition));
@@ -262,11 +334,57 @@ public abstract class LsCuttingPlaneSolverBase :
                         reason));
             }
 
-            iterationReports.Add(
+            var iterationReport =
                 new CutIterationReport(
                     iteration,
                     records,
-                    stopwatch.Elapsed));
+                    stopwatch.Elapsed);
+
+            iterationReports.Add(
+                iterationReport);
+
+            double[] positiveViolations =
+                candidates
+                    .Where(
+                        candidate =>
+                            candidate.Violation > 0.0)
+                    .Select(
+                        candidate =>
+                            candidate.Violation)
+                    .ToArray();
+
+            convergenceIterations.Add(
+                new CuttingPlaneIterationStatistics(
+                    iteration,
+                    lpExecution.ObjectiveValue.Value,
+                    lpExecution.SolveDuration,
+                    stopwatch.Elapsed,
+                    generatedCandidates:
+                        candidates.Count,
+                    eligibleCandidates:
+                        eligibleIndices.Count,
+                    selectedCuts:
+                        selectedCount,
+                    cutsAdded:
+                        newlyAdded.Count,
+                    cumulativeCutsAdded:
+                        addedCuts.Count,
+                    maximumViolation:
+                        candidates.Count == 0
+                            ? 0.0
+                            : candidates.Max(
+                                candidate =>
+                                    candidate.Violation),
+                    meanPositiveViolation:
+                        positiveViolations.Length == 0
+                            ? 0.0
+                            : positiveViolations.Average(),
+                    maximumEfficacy:
+                        candidates.Count == 0
+                            ? 0.0
+                            : candidates.Max(
+                                candidate =>
+                                    candidate.Efficacy)));
 
             if (newlyAdded.Count == 0)
             {
@@ -309,10 +427,16 @@ public abstract class LsCuttingPlaneSolverBase :
             new CutGenerationReport(
                 iterationReports);
 
+        var convergence =
+            new CuttingPlaneConvergenceReport(
+                convergenceIterations,
+                finalExecution.ObjectiveValue);
+
         var executionReport =
             new CuttingPlaneExecutionReport(
                 selectedSolver,
-                cutReport);
+                cutReport,
+                convergence);
 
         if (!finalExecution.HasFeasibleSolution)
         {
@@ -327,7 +451,8 @@ public abstract class LsCuttingPlaneSolverBase :
                 message:
                     BuildMessage(
                         finalExecution,
-                        cutReport));
+                        cutReport,
+                        convergence));
         }
 
         try
@@ -398,7 +523,8 @@ public abstract class LsCuttingPlaneSolverBase :
                 solution,
                 BuildMessage(
                     finalExecution,
-                    cutReport));
+                    cutReport,
+                    convergence));
         }
         catch (Exception exception)
             when (exception is not OperationCanceledException)
@@ -417,10 +543,10 @@ public abstract class LsCuttingPlaneSolverBase :
     }
 
     private UlsSolveResult BuildEarlyFailure(
-        UlsFormulation aggregate,
         LinearModelSolveResult execution,
         SolverExecutionInfo? selectedSolver,
         IReadOnlyList<CutIterationReport> iterationReports,
+        IReadOnlyList<CuttingPlaneIterationStatistics> convergenceIterations,
         string prefix)
     {
         if (selectedSolver is null)
@@ -441,6 +567,11 @@ public abstract class LsCuttingPlaneSolverBase :
             new CutGenerationReport(
                 iterationReports);
 
+        var convergence =
+            new CuttingPlaneConvergenceReport(
+                convergenceIterations,
+                finalMipObjective: null);
+
         return new CuttingPlaneUlsSolveResult(
             Name,
             MapStatusWithoutSolution(
@@ -448,7 +579,8 @@ public abstract class LsCuttingPlaneSolverBase :
             _separator.Method,
             new CuttingPlaneExecutionReport(
                 selectedSolver,
-                cutReport),
+                cutReport,
+                convergence),
             execution,
             solution: null,
             message:
@@ -456,7 +588,8 @@ public abstract class LsCuttingPlaneSolverBase :
                 " " +
                 BuildMessage(
                     execution,
-                    cutReport));
+                    cutReport,
+                    convergence));
     }
 
     private static UlsSolveStatus MapStatusWithoutSolution(
@@ -497,15 +630,31 @@ public abstract class LsCuttingPlaneSolverBase :
 
     private static string BuildMessage(
         LinearModelSolveResult execution,
-        CutGenerationReport cuts)
+        CutGenerationReport cuts,
+        CuttingPlaneConvergenceReport convergence)
     {
         var parts =
             new List<string>
             {
                 $"Cuts generated: {cuts.CutsGenerated}",
                 $"cuts added: {cuts.CutsAdded}",
+                $"not selected: {cuts.NotSelected}",
                 $"separation iterations: {cuts.IterationCount}"
             };
+
+        if (convergence.RootBoundImprovement.HasValue)
+        {
+            parts.Add(
+                $"root bound improvement: " +
+                $"{convergence.RootBoundImprovement.Value:G17}");
+        }
+
+        if (convergence.RootGapClosedFraction.HasValue)
+        {
+            parts.Add(
+                $"root gap closed: " +
+                $"{convergence.RootGapClosedFraction.Value:P2}");
+        }
 
         if (execution.Solver is not null)
         {
@@ -537,8 +686,7 @@ public abstract class LsCuttingPlaneSolverBase :
         SolverKind solverKind)
     {
         LinearModelSolveOptions result =
-            CloneExecutionOptions(
-                source);
+            CloneExecutionOptions(source);
 
         result.Solver =
             solverKind;
@@ -586,7 +734,13 @@ public abstract class LsCuttingPlaneSolverBase :
             MaximumIterations =
                 source.MaximumIterations,
             ViolationTolerance =
-                source.ViolationTolerance
+                source.ViolationTolerance,
+            MinimumEfficacy =
+                source.MinimumEfficacy,
+            SelectionPolicy =
+                source.SelectionPolicy,
+            MaximumCutsPerIteration =
+                source.MaximumCutsPerIteration
         };
     }
 }
