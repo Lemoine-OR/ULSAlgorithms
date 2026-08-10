@@ -1,4 +1,4 @@
-\page groff Groff lot-sizing rule
+\page groff_heuristic Groff lot-sizing rule
 
 # Groff lot-sizing rule
 

@@ -13,7 +13,7 @@ namespace ULSAlgorithms.CuttingPlanes.Separation;
 /// <para>
 /// For each prefix ending in l, the classical inequality is written as
 ///
-/// sum(j in S) x[j] + sum(j in L\S) d[j,l] y[j] >= d[0,l].
+/// sum(j in S) x[j] + sum(j in L minus S) d[j,l] y[j] &gt;= d[0,l].
 ///
 /// For fixed l the most violated member is obtained independently for every
 /// period j by choosing the smaller of x[j] and d[j,l] y[j]. Therefore one

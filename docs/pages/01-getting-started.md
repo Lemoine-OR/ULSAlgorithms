@@ -77,6 +77,9 @@ var solver =
 See @ref solver_catalog_factory for adaptive fallback, external optimization
 engine and cutting-plane examples.
 
+To persist the selected strategy and its constructor options as a reproducible
+JSON artifact, see @ref serializable_solver_configuration.
+
 ## 3. Solve
 
 ```csharp

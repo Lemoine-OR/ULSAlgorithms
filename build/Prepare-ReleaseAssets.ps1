@@ -19,6 +19,11 @@ if ($null -eq $package) {
     throw 'Binary packaging failed to produce release inputs.'
 }
 
+$nuget = & (Join-Path $PSScriptRoot 'Package-NuGet.ps1')
+if ($null -eq $nuget) {
+    throw 'NuGet packaging failed to produce release inputs.'
+}
+
 & (Join-Path $root 'docs\build-documentation.ps1')
 $site = Join-Path $root 'Documentation\site'
 if (-not (Test-Path -LiteralPath (Join-Path $site 'index.html'))) {
@@ -29,7 +34,14 @@ $releaseDir = Join-Path $root 'Documentation\release'
 Remove-Item -LiteralPath $releaseDir -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Path $releaseDir -Force | Out-Null
 
-foreach ($path in @($package.BinaryZip, $package.BinarySha256, $package.BuildMetadata, $package.BinariesManifest)) {
+foreach ($path in @(
+    $package.BinaryZip,
+    $package.BinarySha256,
+    $package.BuildMetadata,
+    $package.BinariesManifest,
+    $nuget.Package,
+    $nuget.Sha256
+)) {
     Copy-Item -LiteralPath $path -Destination (Join-Path $releaseDir ([System.IO.Path]::GetFileName($path))) -Force
 }
 

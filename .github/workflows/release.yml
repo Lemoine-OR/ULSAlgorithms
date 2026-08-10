@@ -13,8 +13,30 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  portability:
+    name: Linux pre-release portability smoke
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout full Git history
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run portable adaptive exact smoke
+        shell: pwsh
+        run: |
+          dotnet run --configuration Release --project tools/ULSAlgorithms.PortabilitySmoke/ULSAlgorithms.PortabilitySmoke.csproj
+
   release:
     name: Build, validate and publish release
+    needs:
+      - portability
     runs-on: windows-latest
     timeout-minutes: 45
     env:
@@ -179,6 +201,9 @@ jobs:
           - Commit: $env:RELEASE_COMMIT
           - Prerelease: $env:RELEASE_PRERELEASE
 
-          - Binary ZIP, documentation ZIP, build metadata, binary manifest,
-            release manifest and SHA-256 checksums were validated before publication.
+          - Binary ZIP, documentation ZIP, NuGet package, build metadata,
+            binary manifest, release manifest and SHA-256 checksums were
+            validated before publication.
+          - Public API compatibility and runtime/documentation catalog
+            consistency were validated before publication.
           "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8

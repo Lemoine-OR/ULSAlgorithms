@@ -13,15 +13,28 @@ if ($files.Count -eq 0) {
 }
 
 $failures = New-Object System.Collections.Generic.List[string]
+
 foreach ($file in $files) {
     $tokens = $null
     $errors = $null
-    [void][System.Management.Automation.Language.Parser]::ParseFile($file.FullName, [ref]$tokens, [ref]$errors)
+
+    [void][System.Management.Automation.Language.Parser]::ParseFile(
+        $file.FullName,
+        [ref]$tokens,
+        [ref]$errors)
+
     foreach ($error in @($errors)) {
-        $failures.Add("$($file.FullName):$($error.Extent.StartLineNumber):$($error.Extent.StartColumnNumber): $($error.Message)")
+        $failures.Add(
+            "$($file.FullName):$($error.Extent.StartLineNumber):$($error.Extent.StartColumnNumber): $($error.Message)")
+    }
+
+    $source = [System.IO.File]::ReadAllText($file.FullName)
+
+    if ($source -match '\[(?:System\.)?IO\.Path\]::GetRelativePath') {
+        $failures.Add(
+            "$($file.FullName): uses System.IO.Path.GetRelativePath, which is not compatible with Windows PowerShell 5.1.")
     }
 }
-
 if ($failures.Count -gt 0) {
     $failures | ForEach-Object { Write-Error $_ }
     throw "PowerShell syntax validation failed with $($failures.Count) error(s)."

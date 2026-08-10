@@ -2,17 +2,18 @@
 
 # ULS Problem and Notation
 
-ULSAlgorithms represents the classical finite-horizon deterministic uncapacitated lot-sizing problem without backlogging.
+ULSAlgorithms represents the classical finite-horizon deterministic
+uncapacitated lot-sizing problem without backlogging.
 
-For period \(t=1,\ldots,T\):
+For period \f$t=1,\ldots,T\f$:
 
-- \(d_t\): demand;
-- \(f_t\): fixed setup cost;
-- \(p_t\): unit production cost;
-- \(h_t\): end-of-period unit holding cost;
-- \(x_t\): production quantity;
-- \(I_t\): end-of-period inventory;
-- \(y_t\in\{0,1\}\): setup decision.
+- \f$d_t\f$: demand;
+- \f$f_t\f$: fixed setup cost;
+- \f$p_t\f$: unit production cost;
+- \f$h_t\f$: end-of-period unit holding cost;
+- \f$x_t\f$: production quantity;
+- \f$I_t\f$: end-of-period inventory;
+- \f$y_t\in\{0,1\}\f$: setup decision.
 
 A standard mixed-integer representation is
 
@@ -40,19 +41,26 @@ and a setup-linking condition such as
 x_t \le M_t y_t.
 \f]
 
-The API assumes zero initial inventory and no backlogging. Exact algorithms in the library reconstruct standard zero-ending-inventory solutions.
+The API assumes zero initial inventory and no backlogging. Exact algorithms in
+the library reconstruct standard zero-ending-inventory solutions.
 
 ## Cost conventions
 
-`HoldingCosts[t]` is the cost of carrying one unit in **end-of-period** inventory after period `t`.
+`HoldingCosts[t]` is the cost of carrying one unit in **end-of-period**
+inventory after period `t`.
 
-The final holding-cost coefficient is consequently not used by a standard zero-ending-inventory solution, although the API keeps a horizon-length vector for a regular memory layout.
+The final holding-cost coefficient is consequently not used by a standard
+zero-ending-inventory solution, although the API keeps a horizon-length vector
+for a regular memory layout.
 
 ## Regeneration intervals
 
-Many exact methods exploit the zero-inventory-ordering structure. A replenishment at period \(i\) may cover a regeneration interval \(i,\ldots,j\).
+Many exact methods exploit the zero-inventory-ordering structure. A
+replenishment at period \f$i\f$ may cover a regeneration interval
+\f$i,\ldots,j\f$.
 
-That perspective supports several algorithmic interpretations in this repository:
+That perspective supports several algorithmic interpretations in this
+repository:
 
 - dynamic programming;
 - geometric lower-envelope methods;

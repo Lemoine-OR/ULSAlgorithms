@@ -1,6 +1,39 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+function Get-RelativePathCompat {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$BasePath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$TargetPath
+    )
+
+    $baseFullPath = [System.IO.Path]::GetFullPath($BasePath)
+    $targetFullPath = [System.IO.Path]::GetFullPath($TargetPath)
+
+    $separator = [System.IO.Path]::DirectorySeparatorChar
+
+    if (-not $baseFullPath.EndsWith($separator.ToString())) {
+        $baseFullPath += $separator
+    }
+
+    $comparison =
+        if ($env:OS -eq 'Windows_NT') {
+            [System.StringComparison]::OrdinalIgnoreCase
+        }
+        else {
+            [System.StringComparison]::Ordinal
+        }
+
+    if (-not $targetFullPath.StartsWith($baseFullPath, $comparison)) {
+        throw "Path '$targetFullPath' is not located under base path '$baseFullPath'."
+    }
+
+    return $targetFullPath.Substring($baseFullPath.Length)
+}
+
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $tools = Join-Path $root 'tools'
 $target = & (Join-Path $tools 'Get-BuildTarget.ps1')
@@ -60,7 +93,9 @@ foreach ($project in $sourceProjects) {
     $targetProjectRoot = Join-Path $validatedRoot $projectName
 
     foreach ($file in $files) {
-        $relative = [System.IO.Path]::GetRelativePath($releaseRoot, $file.FullName)
+        $relative = Get-RelativePathCompat `
+    		-BasePath $releaseRoot `
+    		-TargetPath $file.FullName
         $destination = Join-Path $targetProjectRoot $relative
 
         New-Item -ItemType Directory -Path (Split-Path -Parent $destination) -Force | Out-Null
@@ -68,7 +103,11 @@ foreach ($project in $sourceProjects) {
 
         $manifestEntries.Add([pscustomobject]@{
             project = $projectName
-            path = [System.IO.Path]::GetRelativePath($validatedRoot, $destination).Replace('\', '/')
+            path = (
+    Get-RelativePathCompat `
+        -BasePath $validatedRoot `
+        -TargetPath $destination
+).Replace('\', '/')
             size = (Get-Item -LiteralPath $destination).Length
             sha256 = (Get-FileHash -LiteralPath $destination -Algorithm SHA256).Hash.ToLowerInvariant()
         })

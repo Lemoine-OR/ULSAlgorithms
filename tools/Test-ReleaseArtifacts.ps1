@@ -22,6 +22,8 @@ $required = @(
     "ULSAlgorithms-$v-binaries.zip.sha256",
     "ULSAlgorithms-$v-documentation.zip",
     "ULSAlgorithms-$v-documentation.zip.sha256",
+    "ULSAlgorithms.$v.nupkg",
+    "ULSAlgorithms.$v.nupkg.sha256",
     'build-metadata.json',
     'binaries-manifest.json',
     'release-manifest.json',
@@ -53,6 +55,17 @@ foreach ($shaFile in $shaFiles) {
     $actual = (Get-FileHash -LiteralPath $targetPath -Algorithm SHA256).Hash.ToLowerInvariant()
     if ($actual -ne $expected) {
         throw "SHA-256 mismatch for $targetName. Expected $expected, got $actual."
+    }
+}
+
+& (Join-Path $PSScriptRoot 'Test-NuGetPackage.ps1') `
+    -PackagePath (Join-Path $ReleaseDirectory "ULSAlgorithms.$v.nupkg")
+
+$manifest = Get-Content -LiteralPath (Join-Path $ReleaseDirectory 'release-manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+$manifestNames = @($manifest.assets | ForEach-Object { [string]$_.name })
+foreach ($name in $required | Where-Object { $_ -notin @('release-manifest.json','release-manifest.json.sha256') }) {
+    if ($manifestNames -notcontains $name) {
+        throw "Release manifest does not record required asset: $name"
     }
 }
 

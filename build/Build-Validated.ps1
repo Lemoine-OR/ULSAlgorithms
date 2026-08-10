@@ -17,4 +17,10 @@ if ($null -eq $package) {
     throw 'Validated binary packaging unexpectedly returned no result.'
 }
 
+$nuget = & (Join-Path $PSScriptRoot 'Package-NuGet.ps1')
+if ($null -eq $nuget) {
+    throw 'Validated NuGet packaging unexpectedly returned no result.'
+}
+
 Write-Host "Validated binary package: $($package.BinaryZip)"
+Write-Host "Validated NuGet package: $($nuget.Package)"

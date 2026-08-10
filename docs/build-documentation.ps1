@@ -448,7 +448,7 @@ foreach ($groupName in @("exact","optimization","cutting","heuristic")) {
     }
     [void]$catalogPage.AppendLine("")
 }
-Set-Content -LiteralPath (Join-Path $GeneratedRoot "algorithm-catalog.generated.md") -Value $catalogPage.ToString() -Encoding UTF8
+[IO.File]::WriteAllText((Join-Path $GeneratedRoot "algorithm-catalog.generated.md"), $catalogPage.ToString(), [Text.UTF8Encoding]::new($false))
 
 # One stable Doxygen API landing page per algorithm.
 foreach ($a in $algorithms) {
@@ -457,7 +457,7 @@ foreach ($a in $algorithms) {
     [void]$page.AppendLine("")
     [void]$page.AppendLine("# $($a.Name)")
     [void]$page.AppendLine("")
-    [void]$page.AppendLine("**Class:** @ref $($a.Class)")
+    [void]$page.AppendLine("**Class:** ``$($a.Namespace).$($a.Class)``")
     [void]$page.AppendLine("")
     [void]$page.AppendLine("**Family:** $($a.Family)  ")
     [void]$page.AppendLine("**Time:** $($a.Time)  ")
@@ -492,8 +492,8 @@ foreach ($a in $algorithms) {
     [void]$page.AppendLine("")
     [void]$page.AppendLine("## Full class reference")
     [void]$page.AppendLine("")
-    [void]$page.AppendLine("Open @ref $($a.Class) for constructors, members and source-level documentation.")
-    Set-Content -LiteralPath (Join-Path $GeneratedRoot ("algorithm-" + $a.Slug + ".md")) -Value $page.ToString() -Encoding UTF8
+    [void]$page.AppendLine("Use the Doxygen Classes index for constructors, members and source-level documentation.")
+    [IO.File]::WriteAllText((Join-Path $GeneratedRoot ("algorithm-" + $a.Slug + ".md")), $page.ToString(), [Text.UTF8Encoding]::new($false))
 }
 
 # Doxygen API.
@@ -533,11 +533,96 @@ OUTPUT_DIRECTORY       = $outputValue
 INPUT                  = $inputValue
 USE_MDFILE_AS_MAINPAGE = $mainPageValue
 "@
-Set-Content -LiteralPath $tempDoxyfile -Value $generatedDoxyfile -Encoding UTF8
+[IO.File]::WriteAllText($tempDoxyfile, $generatedDoxyfile, [Text.UTF8Encoding]::new($false))
 Write-Host ""
 Write-Host "Generating ULSAlgorithms API documentation..."
-& doxygen $tempDoxyfile | Out-Host
-if ($LASTEXITCODE -ne 0) { throw "Doxygen documentation build failed with exit code $LASTEXITCODE." }
+
+# Doxygen 1.17 treats a UTF-8 BOM in the generated config as an unknown 0xef
+# character when warnings are fatal. Verify every generated Doxygen input.
+$doxygenInputs = @($tempDoxyfile) + @($generatedMarkdownInputs)
+foreach ($doxygenInput in $doxygenInputs) {
+    $bytes = [IO.File]::ReadAllBytes($doxygenInput)
+    if ($bytes.Length -ge 3 -and
+        $bytes[0] -eq 0xEF -and
+        $bytes[1] -eq 0xBB -and
+        $bytes[2] -eq 0xBF) {
+        throw "Doxygen input contains an unexpected UTF-8 BOM: $doxygenInput"
+    }
+}
+
+$doxygenCommand = (Get-Command doxygen -ErrorAction Stop).Source
+$doxygenStdoutLog = Join-Path $Documentation "doxygen.stdout.log"
+$doxygenStderrLog = Join-Path $Documentation "doxygen.stderr.log"
+$doxygenCombinedLog = Join-Path $Documentation "doxygen-v028.log"
+
+foreach ($logPath in @(
+    $doxygenStdoutLog,
+    $doxygenStderrLog,
+    $doxygenCombinedLog
+)) {
+    Remove-Item -LiteralPath $logPath -Force -ErrorAction SilentlyContinue
+}
+
+# Start-Process prevents Windows PowerShell 5.1 from turning native stderr
+# lines into terminating PowerShell ErrorRecord objects.
+$doxygenArgument = '"' + $tempDoxyfile + '"'
+$doxygenProcess = Start-Process `
+    -FilePath $doxygenCommand `
+    -ArgumentList $doxygenArgument `
+    -NoNewWindow `
+    -Wait `
+    -PassThru `
+    -RedirectStandardOutput $doxygenStdoutLog `
+    -RedirectStandardError $doxygenStderrLog
+
+$stdoutText =
+    if (Test-Path -LiteralPath $doxygenStdoutLog) {
+        [IO.File]::ReadAllText($doxygenStdoutLog)
+    }
+    else {
+        ''
+    }
+
+$stderrText =
+    if (Test-Path -LiteralPath $doxygenStderrLog) {
+        [IO.File]::ReadAllText($doxygenStderrLog)
+    }
+    else {
+        ''
+    }
+
+if (-not [string]::IsNullOrWhiteSpace($stdoutText)) {
+    Write-Host ($stdoutText.TrimEnd())
+}
+
+if (-not [string]::IsNullOrWhiteSpace($stderrText)) {
+    Write-Host ($stderrText.TrimEnd())
+}
+
+$combinedParts = @(
+    "Doxygen exit code: $($doxygenProcess.ExitCode)"
+)
+
+if (-not [string]::IsNullOrWhiteSpace($stdoutText)) {
+    $combinedParts += ''
+    $combinedParts += '----- stdout -----'
+    $combinedParts += $stdoutText.TrimEnd()
+}
+
+if (-not [string]::IsNullOrWhiteSpace($stderrText)) {
+    $combinedParts += ''
+    $combinedParts += '----- stderr -----'
+    $combinedParts += $stderrText.TrimEnd()
+}
+
+[IO.File]::WriteAllText(
+    $doxygenCombinedLog,
+    ($combinedParts -join [Environment]::NewLine) + [Environment]::NewLine,
+    [Text.UTF8Encoding]::new($false))
+
+if ($doxygenProcess.ExitCode -ne 0) {
+    throw "Doxygen documentation build failed with exit code $($doxygenProcess.ExitCode). Diagnostic log: $doxygenCombinedLog"
+}
 $ApiHtml = Join-Path $DoxygenRoot "html"
 if (-not (Test-Path -LiteralPath (Join-Path $ApiHtml "index.html"))) { throw "Doxygen did not generate html/index.html." }
 $ApiSite = Join-Path $SiteRoot "api"

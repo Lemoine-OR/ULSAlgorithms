@@ -154,8 +154,8 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Exact/AggarwalPark/AggarwalParkSolver.cs",
-      "publication": "Aggarwal & Park",
-      "doi": "",
+      "publication": "Aggarwal & Park (1993), Improved Algorithms for Economic Lot Size Problems, Operations Research 41(3), 549-571",
+      "doi": "10.1287/opre.41.3.549",
       "implementation": "CDQ + implicit Monge/SMAWK architecture"
     },
     {

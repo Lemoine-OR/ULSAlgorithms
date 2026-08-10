@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   build:
-    name: Version, build, test and validate binaries
+    name: Version, build, test and validate packages
     runs-on: windows-latest
 
     steps:
@@ -33,6 +33,20 @@ jobs:
         run: |
           ./build/Build-Validated.ps1
 
+      - name: Collect coverage report (no percentage threshold)
+        shell: pwsh
+        run: |
+          dotnet test tests/ULSAlgorithms.Tests/ULSAlgorithms.Tests.csproj --configuration Release --no-build --collect:"XPlat Code Coverage" --results-directory Documentation/coverage
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ULSAlgorithms-Coverage
+          path: Documentation/coverage
+          if-no-files-found: ignore
+          retention-days: 30
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v7
@@ -42,14 +56,35 @@ jobs:
           if-no-files-found: ignore
           retention-days: 30
 
-      - name: Upload validated binaries
+      - name: Upload validated packages
         uses: actions/upload-artifact@v7
         with:
           name: ULSAlgorithms-validated
           path: |
             Documentation/artifacts/validated
+            Documentation/artifacts/nuget
             Documentation/artifacts/*.zip
             Documentation/artifacts/*.sha256
             Documentation/artifacts/*.json
-          if-no-files-found: ignore
+          if-no-files-found: error
           retention-days: 30
+
+  portability:
+    name: Linux compile and self-contained exact smoke
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout full Git history
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run portable adaptive exact smoke
+        shell: pwsh
+        run: |
+          dotnet run --configuration Release --project tools/ULSAlgorithms.PortabilitySmoke/ULSAlgorithms.PortabilitySmoke.csproj

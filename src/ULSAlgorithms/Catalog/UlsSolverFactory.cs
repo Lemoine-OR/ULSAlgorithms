@@ -35,6 +35,25 @@ public static class UlsSolverFactory
     }
 
     /// <summary>
+    /// Creates a new solver from a versioned serializable configuration.
+    /// </summary>
+    /// <param name="configuration">
+    /// Stable solver identifier plus constructor-level options.
+    /// </param>
+    /// <returns>A fresh configured solver instance.</returns>
+    public static IUlsSolver Create(
+        UlsSolverConfiguration configuration)
+    {
+        ArgumentNullException.ThrowIfNull(configuration);
+
+        configuration.Validate();
+
+        return Create(
+            configuration.SolverId,
+            configuration.Options);
+    }
+
+    /// <summary>
     /// Attempts to create a solver using its stable catalog identifier.
     /// </summary>
     /// <param name="id">Stable identifier.</param>

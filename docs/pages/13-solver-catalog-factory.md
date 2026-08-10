@@ -292,3 +292,32 @@ Validation can be run explicitly with:
 
 The normal Build/Test preflight and the documentation workflow both run the
 same synchronization check.
+
+## Persist a configured strategy
+
+v0.28.0 adds `UlsSolverConfiguration`, a versioned JSON envelope around the
+stable strategy ID and `UlsSolverCreationOptions`:
+
+```csharp
+var configuration =
+    new UlsSolverConfiguration
+    {
+        SolverId = "lyu-lee-parallel",
+        Options =
+            new UlsSolverCreationOptions
+            {
+                MaxDegreeOfParallelism = 4,
+                ParallelThreshold = 256
+            }
+    };
+
+configuration.SaveJson("solver-config.json");
+
+var solver =
+    UlsSolverFactory.Create(
+        UlsSolverConfiguration.LoadJson("solver-config.json"));
+```
+
+See @ref serializable_solver_configuration for schema, validation and
+reproducibility guidance.
+

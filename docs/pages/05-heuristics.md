@@ -1,6 +1,6 @@
 \page heuristics Heuristics
 
-# Heuristics
+# Heuristic Strategy Families
 
 Heuristics use the same `IUlsSolver` interface as exact methods, but return
 `UlsSolveStatus.Feasible`: they construct a valid plan without claiming an
