@@ -24,6 +24,8 @@ $required = @(
     "ULSAlgorithms-$v-documentation.zip.sha256",
     "ULSAlgorithms.$v.nupkg",
     "ULSAlgorithms.$v.nupkg.sha256",
+    "ULSAlgorithms.$v.snupkg",
+    "ULSAlgorithms.$v.snupkg.sha256",
     'build-metadata.json',
     'binaries-manifest.json',
     'release-manifest.json',
@@ -60,6 +62,10 @@ foreach ($shaFile in $shaFiles) {
 
 & (Join-Path $PSScriptRoot 'Test-NuGetPackage.ps1') `
     -PackagePath (Join-Path $ReleaseDirectory "ULSAlgorithms.$v.nupkg")
+
+& (Join-Path $PSScriptRoot 'Test-NuGetSymbolPackage.ps1') `
+    -PackagePath (Join-Path $ReleaseDirectory "ULSAlgorithms.$v.snupkg") `
+    -PackageVersion $v
 
 $manifest = Get-Content -LiteralPath (Join-Path $ReleaseDirectory 'release-manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
 $manifestNames = @($manifest.assets | ForEach-Object { [string]$_.name })

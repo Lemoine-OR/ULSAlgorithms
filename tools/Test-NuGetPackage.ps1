@@ -21,13 +21,18 @@ try {
         'lib/net10.0/ULSAlgorithms.dll',
         'lib/net10.0/ULSAlgorithms.xml',
         'README.md',
-        'LICENSE'
+        'LICENSE',
+        'CITATION.cff'
     )
 
     foreach ($entry in $required) {
         if ($entries -notcontains $entry) {
             throw "NuGet package is missing required entry: $entry"
         }
+    }
+
+    if ($entries -contains 'lib/net10.0/ULSAlgorithms.pdb') {
+        throw 'Main .nupkg unexpectedly contains the portable PDB; symbols must be in the .snupkg.'
     }
 
     $nuspecEntries = @($archive.Entries | Where-Object { $_.FullName -like '*.nuspec' })
@@ -55,7 +60,7 @@ try {
         '/*[local-name()="package"]/*[local-name()="metadata"]/*[local-name()="repository"]')
 
     if ($null -eq $idNode -or $idNode.InnerText -ne 'ULSAlgorithms') {
-        throw "Unexpected or missing NuGet package id."
+        throw 'Unexpected or missing NuGet package id.'
     }
 
     if ($null -eq $licenseNode -or
@@ -69,8 +74,9 @@ try {
     }
 
     if ($null -eq $repositoryNode -or
-        $repositoryNode.GetAttribute('url') -ne 'https://github.com/Lemoine-OR/ULSAlgorithms') {
-        throw 'NuGet package does not declare the expected repository URL.'
+        $repositoryNode.GetAttribute('url') -ne 'https://github.com/Lemoine-OR/ULSAlgorithms' -or
+        $repositoryNode.GetAttribute('type') -ne 'git') {
+        throw 'NuGet package does not declare the expected git repository metadata.'
     }
 }
 finally {

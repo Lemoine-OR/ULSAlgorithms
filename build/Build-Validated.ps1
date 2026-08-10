@@ -24,3 +24,4 @@ if ($null -eq $nuget) {
 
 Write-Host "Validated binary package: $($package.BinaryZip)"
 Write-Host "Validated NuGet package: $($nuget.Package)"
+Write-Host "Validated NuGet symbol package: $($nuget.SymbolPackage)"

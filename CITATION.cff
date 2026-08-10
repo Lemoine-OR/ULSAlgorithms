@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use ULSAlgorithms in academic work, please cite this software using the metadata in this file."
+title: ULSAlgorithms
+type: software
+authors:
+  - family-names: Lemoine
+    given-names: David
+repository-code: "https://github.com/Lemoine-OR/ULSAlgorithms"
+license: MIT
+abstract: >-
+  High-performance C# and .NET exact algorithms, mathematical formulations,
+  cutting-plane methods and classical heuristics for the deterministic
+  finite-horizon uncapacitated lot-sizing problem.
+keywords:
+  - operations research
+  - lot sizing
+  - optimization
+  - dynamic programming
+  - heuristics

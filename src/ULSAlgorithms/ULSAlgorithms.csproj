@@ -11,10 +11,23 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>operations-research;lot-sizing;optimization;dynamic-programming;heuristics</PackageTags>
+
+    <!-- Official .NET package validation runs after Pack. The released 1.0.0
+         package can later become PackageValidationBaselineVersion for 1.x. -->
+    <EnablePackageValidation>true</EnablePackageValidation>
+
+    <!-- .NET 8+ SDKs include Source Link build tooling. Publish portable
+         symbols as a modern NuGet .snupkg without adding a Source Link package
+         dependency to the product. -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
     <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
+    <None Include="..\..\CITATION.cff" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

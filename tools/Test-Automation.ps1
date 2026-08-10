@@ -12,6 +12,7 @@ $required = @(
     '.github/workflows/release.yml',
     'API-STABILITY.md',
     'CHANGELOG.md',
+    'CITATION.cff',
     'LICENSE',
     'README.md',
     'build/Build-All.ps1',
@@ -29,8 +30,11 @@ $required = @(
     'tools/Get-DotNetProjects.ps1',
     'tools/Install-Doxygen.ps1',
     'tools/Get-ULSAlgorithmsVersion.ps1',
+    'tools/Test-CitationCff.ps1',
     'tools/Test-DocumentationGeneratorHardening.ps1',
+    'tools/Test-NuGetConsumer.ps1',
     'tools/Test-NuGetPackage.ps1',
+    'tools/Test-NuGetSymbolPackage.ps1',
     'tools/Test-PublicApi.ps1',
     'tools/Update-PublicApiSnapshot.ps1',
     'tools/Test-ReleaseArtifacts.ps1',
@@ -56,6 +60,7 @@ if ($stale) {
     throw 'Automation still contains references to the previous repository product name.'
 }
 
+& (Join-Path $PSScriptRoot 'Test-CitationCff.ps1')
 & (Join-Path $PSScriptRoot 'Test-DocumentationGeneratorHardening.ps1')
 
 $target = & (Join-Path $PSScriptRoot 'Get-BuildTarget.ps1')

@@ -40,7 +40,9 @@ foreach ($path in @(
     $package.BuildMetadata,
     $package.BinariesManifest,
     $nuget.Package,
-    $nuget.Sha256
+    $nuget.Sha256,
+    $nuget.SymbolPackage,
+    $nuget.SymbolSha256
 )) {
     Copy-Item -LiteralPath $path -Destination (Join-Path $releaseDir ([System.IO.Path]::GetFileName($path))) -Force
 }

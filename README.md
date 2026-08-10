@@ -150,12 +150,18 @@ Each validated GitHub release contains:
 - binary ZIP;
 - documentation ZIP;
 - NuGet package;
+- NuGet portable-symbol package (`.snupkg`);
 - build metadata;
 - binary and release manifests;
 - SHA-256 sidecars.
 
-The `.nupkg` can be installed from a local/package feed without requiring a
-separate source build.
+The `.nupkg` is validated twice: its archive/metadata structure is checked, then
+an isolated temporary .NET 10 consumer restores the exact local package,
+compiles against it and solves a deterministic ULS smoke instance.
+
+The `.snupkg` provides the portable PDB for source-aware debugging. The project
+uses the Source Link tooling included in modern .NET SDKs and publishes
+repository metadata with the package.
 
 ## Validation and performance
 
@@ -168,7 +174,9 @@ The project uses:
 - edge-case and cancellation tests;
 - BenchmarkDotNet performance campaigns;
 - runtime/documentation catalog synchronization;
-- public API compatibility checks;
+- the repository public-API compatibility baseline;
+- official .NET package validation during `dotnet pack`;
+- an isolated real NuGet consumer restore/build/run smoke;
 - repository-wide Release builds and the complete test suite on both Windows
   and Linux in CI;
 - an additional Linux portability smoke path;
@@ -190,6 +198,11 @@ The generated documentation portal contains:
 - scientific references and DOI links;
 - mathematical formulations where relevant;
 - examples and API reference.
+
+## Citation
+
+Academic users can cite the software with the repository-level `CITATION.cff`.
+The citation metadata is also included in the NuGet package.
 
 ## API stability
 
