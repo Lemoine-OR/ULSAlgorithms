@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480">
+  <defs>
+    <linearGradient id="bar" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#28558A"/><stop offset="1" stop-color="#5FB6F1"/></linearGradient>
+  </defs>
+  <g opacity=".28" stroke="#8BD9FF" fill="none">
+    <path d="M70 330 C155 110 265 380 360 170 S570 235 655 95" stroke-width="3"/>
+    <path d="M72 390 C190 310 235 195 350 285 S535 120 660 190" stroke-width="2"/>
+  </g>
+  <g fill="#8BD9FF">
+    <circle cx="70" cy="330" r="7"/><circle cx="170" cy="202" r="8"/><circle cx="258" cy="310" r="7"/><circle cx="360" cy="170" r="10"/><circle cx="474" cy="208" r="8"/><circle cx="562" cy="168" r="7"/><circle cx="655" cy="95" r="8"/>
+  </g>
+  <g fill="#FF9500">
+    <circle cx="135" cy="347" r="7"/><circle cx="280" cy="280" r="8"/><circle cx="421" cy="232" r="8"/><circle cx="570" cy="180" r="8"/>
+  </g>
+  <path d="M78 392 C198 347 318 286 447 237 S578 197 658 151" fill="none" stroke="#FF9500" stroke-width="4"/>
+  <g fill="url(#bar)" opacity=".94">
+    <rect x="105" y="362" width="38" height="72" rx="4"/><rect x="171" y="326" width="38" height="108" rx="4"/>
+    <rect x="237" y="390" width="38" height="44" rx="4"/><rect x="303" y="300" width="38" height="134" rx="4"/>
+    <rect x="369" y="350" width="38" height="84" rx="4"/><rect x="435" y="276" width="38" height="158" rx="4"/>
+    <rect x="501" y="318" width="38" height="116" rx="4"/><rect x="567" y="240" width="38" height="194" rx="4"/>
+  </g>
+  <g stroke="#A9DAFF" opacity=".7"><line x1="76" y1="434" x2="642" y2="434"/><line x1="76" y1="434" x2="76" y2="85"/></g>
+  <text x="620" y="470" fill="#A9DAFF" font-family="Segoe UI,Arial" font-size="20">t</text>
+</svg>
