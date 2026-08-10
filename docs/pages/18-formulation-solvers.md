@@ -2,10 +2,10 @@
 
 # Solver-Backed ULS Formulation Strategies
 
-ULSAlgorithms v0.19.0 promotes the four mathematical formulations introduced
+ULSAlgorithms v0.19.0 promoted the four mathematical formulations introduced
 in v0.17.0 to normal exact ULS Strategy implementations.
 
-The new public classes are:
+The public classes are:
 
 ```text
 AggregateInventoryFormulationSolver
@@ -92,15 +92,16 @@ contains no explicit inventory variables.
 
 A solver-backed strategy is accepted only after two checks.
 
-First, v0.18.0 validates the raw optimization result against `LinearModel`:
+First, the generic optimization layer validates the returned optimization
+candidate against `LinearModel`:
 
 - bounds;
 - integrality;
 - every mathematical constraint;
 - portable-model objective.
 
-Second, v0.19.0 validates the reconstructed `UlsSolution` against the original
-`UlsProblem`:
+Second, the formulation strategy validates the reconstructed `UlsSolution`
+against the original `UlsProblem`:
 
 - inventory balance;
 - final zero inventory;
@@ -115,17 +116,28 @@ portable-model objective.
 
 A mismatch returns `UlsSolveStatus.Failed`, never `Optimal`.
 
-## Numerical normalization
+## Numerical normalization and row feasibility
 
-The v0.18.0 normalization policy remains in force before reconstruction:
+The execution-layer normalization policy remains in force before
+reconstruction:
 
 ```text
 zero tolerance          1e-8
+feasibility tolerance   1e-7
 integrality tolerance   1e-7
 near-integer tolerance  1e-8
 ```
 
-Small floating-point residues are cleaned; material errors are not hidden.
+Bounds and integrality are checked with their absolute tolerances. Constraint
+feasibility uses the execution layer's mixed absolute/relative row scale:
+
+\f[
+\max\left(1,\lvert b\rvert,\sum_i\lvert a_i x_i\rvert\right).
+\f]
+
+This keeps small rows protected by the absolute tolerance while preventing
+harmless solver-output residuals on larger rows from being mistaken for
+material infeasibility.
 
 ## Provenance
 
@@ -143,7 +155,7 @@ selection diagnostics.
 
 ## Scientific identity
 
-The formulation strategy does not replace the native dynamic-programming or
+The formulation strategies do not replace the native dynamic-programming or
 geometric implementations. All remain separate public strategies so users can
-benchmark, cite and compare the mathematical formulation against the direct
+benchmark, cite and compare mathematical formulations against the direct
 algorithmic methods.

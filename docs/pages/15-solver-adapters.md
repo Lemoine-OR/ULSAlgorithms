@@ -2,19 +2,34 @@
 
 # Concrete Solver Adapters
 
-ULSAlgorithms ships four optional machine-discovery adapters for future
-solver-backed formulations and cutting-plane methods.
+ULSAlgorithms ships four optional machine-discovery adapters used by the
+current portable optimization-execution layer and by all six public
+solver-backed ULS strategies:
+
+- four mathematical-formulation strategies;
+- two `(l,S)` cutting-plane strategies.
+
+The adapters are responsible for locating a usable optimization engine,
+checking the required runtime/capability path and returning reproducible
+selection diagnostics. Provider-specific model execution is then delegated to
+the corresponding `ILinearModelSolverExecutor`.
+
+No external optimizer is required by direct exact algorithms or heuristics.
 
 ## Automatic priority
 
-The default order is deliberately identical to LotSizingDataModel:
+Automatic selection uses the repository-wide order:
 
 1. **IBM ILOG CPLEX**
 2. **Gurobi Optimizer**
 3. **FICO Xpress MP**
 4. **COIN-OR CBC**
 
-Use:
+At the generic execution level, callers normally use `LinearModelSolver`,
+which performs capability-aware selection automatically.
+
+The lower-level discovery API remains available when only engine discovery or
+diagnostics are required:
 
 ```csharp
 SolverSelectionResult selection =
@@ -24,7 +39,7 @@ SolverSelectionResult selection =
         cancellationToken);
 ```
 
-No manual registry construction is required.
+No manual registry construction is required for the built-in engines.
 
 ## CPLEX
 
@@ -48,6 +63,10 @@ The adapter dynamically loads the assemblies, instantiates
 Failure to create the CPLEX environment is reported as a load or licensing
 failure rather than silently accepting the installation directory.
 
+The execution backend submits the portable LP model through the selected CPLEX
+installation and parses the generated solution artifact back into portable
+variable IDs.
+
 ## Gurobi
 
 Gurobi is probed through the official `gurobi_cl` executable.
@@ -69,6 +88,9 @@ gurobi_cl --license
 
 and records version and license diagnostics.
 
+The execution backend writes the portable model, requests a result file and
+maps the returned portable `v_<id>` variable names to the model.
+
 ## FICO Xpress
 
 Xpress remains optional and is loaded by reflection from `Optimizer.dll`.
@@ -83,6 +105,9 @@ Discovery checks:
 The adapter invokes `Optimizer.XPRS.Init` and `Optimizer.XPRS.Free`. Successful
 initialization is the availability criterion because it exercises the managed
 assembly, native runtime and license initialization path.
+
+The execution backend reuses that optional runtime through reflection and maps
+the returned solution to the portable model.
 
 ## COIN-OR CBC
 
@@ -105,11 +130,43 @@ cbc -quit
 
 and parses the CBC version banner. CBC requires no commercial runtime license.
 
-## Scope of this release
+The execution backend invokes CBC on the portable LP model, parses the text
+solution and returns the same normalized `LinearModelSolveResult` contract as
+the commercial engines.
 
-These adapters provide **real machine availability detection and provenance**.
+## Current end-to-end use
 
-They intentionally do not yet define a generic mathematical-model execution API.
-The next solver-backed ULS formulations will consume the selected adapter and
-their own execution backend while preserving the same automatic selection and
-diagnostic contract.
+The adapters are no longer discovery-only infrastructure. The production path
+is:
+
+```text
+UlsProblem
+  -> formulation or cutting-plane strategy
+  -> portable LinearModel
+  -> LinearModelSolver
+  -> automatic/explicit solver selection
+  -> provider executor
+  -> normalized native solution
+  -> independent LinearModel validation
+  -> reconstructed UlsSolution
+  -> ULS feasibility/objective validation
+```
+
+The four formulation strategies are:
+
+```text
+aggregate-inventory-formulation
+facility-location-formulation
+shortest-path-formulation
+inventory-eliminated-formulation
+```
+
+The two cutting-plane strategies are:
+
+```text
+general-ls-cutting-plane
+wagner-whitin-ls-cutting-plane
+```
+
+All six are normal public exact strategies in the runtime catalog and can use
+CPLEX, Gurobi, Xpress or CBC through this common execution layer.

@@ -18,6 +18,9 @@ The project follows Semantic Versioning from the 1.0.0 release onward.
 - The release workflow requires the same full Linux validation before the Windows publication job may start.
 - Scientific metadata now records the published Evans (1985) DOI and the DeMatteis (1968) DOI used by Part-Period Balancing.
 - Lyu-Lee complexity metadata now distinguishes `O(T²)` total implementation work from the ideal `O(T²/p)` parallel candidate-evaluation span.
+- Solver-adapter and solver-execution documentation now describes the implemented end-to-end formulation/cutting-plane architecture instead of historical future-state text.
+- Numerical documentation now matches the scaled row-feasibility policy used by the independent portable-model checker.
+- README validation claims now reflect the repository-wide Windows/Linux build gate and real CBC qualification.
 
 ### Validation
 - The CBC qualification compares all four mathematical formulations and both `(l,S)` cutting-plane strategies against the self-contained `adaptive-exact` oracle on a deterministic instance with known objective 680.

@@ -169,7 +169,11 @@ The project uses:
 - BenchmarkDotNet performance campaigns;
 - runtime/documentation catalog synchronization;
 - public API compatibility checks;
-- a Linux portability smoke path in CI;
+- repository-wide Release builds and the complete test suite on both Windows
+  and Linux in CI;
+- an additional Linux portability smoke path;
+- real COIN-OR CBC end-to-end qualification for all six solver-backed
+  strategies;
 - a Cobertura-compatible CI coverage artifact without an arbitrary pass threshold;
 - reproducible versioned release manifests and SHA-256 checksums.
 
