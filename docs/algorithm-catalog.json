@@ -3,6 +3,18 @@
   "project": "ULSAlgorithms",
   "exact": [
     {
+      "name": "Adaptive exact selection",
+      "class": "AdaptiveExactUlsSolver",
+      "family": "Adaptive exact strategy selection",
+      "time": "O(T) in the NSM case; O(T log T) in the general case",
+      "space": "O(T)",
+      "applicability": "All validated classical ULS instances; dispatches from the no-speculative-motive condition",
+      "sourcePath": "src/ULSAlgorithms/Selection/AdaptiveExactUlsSolver.cs",
+      "publication": "Wagelmans, Van Hoesel & Kolen (1992); Federgruen & Tzur (1991)",
+      "doi": "10.1287/opre.40.1.S145",
+      "implementation": "Selects the linear Wagner-Whitin specialization when applicable; otherwise uses a configurable O(T log T) general exact fallback"
+    },
+    {
       "name": "Wagner–Whitin classical",
       "class": "WagnerWhitinClassicalSolver",
       "family": "Wagner–Whitin DP",

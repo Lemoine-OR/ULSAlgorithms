@@ -59,6 +59,9 @@ function Get-GroupLabel([string]$Group) {
 }
 
 function Get-Description([object]$Algorithm) {
+    if ($Algorithm.Class -eq "AdaptiveExactUlsSolver") {
+        return "Adaptive exact selection is the recommended orchestration strategy when client code needs an exact ULS solution without hard-coding a particular exact algorithm. It inspects the no-speculative-motive cost condition and dispatches to the fastest supported specialized or general exact strategy."
+    }
     switch ($Algorithm.Group) {
         "heuristic" {
             return "$($Algorithm.Name) is a fast ULS heuristic in the $($Algorithm.Family) family. It constructs a feasible replenishment plan without claiming an optimality proof. Use it only when the documented applicability conditions match the instance."
@@ -76,6 +79,9 @@ function Get-Description([object]$Algorithm) {
 }
 
 function Get-HowItWorks([object]$Algorithm) {
+    if ($Algorithm.Class -eq "AdaptiveExactUlsSolver") {
+        return "The selector checks p[t] + h[t] >= p[t+1] over adjacent periods. If the condition holds, it executes the linear-time Wagner-Whitin specialization. Otherwise it executes the configured general O(T log T) solver, Wagelmans by default or Federgruen-Tzur when explicitly requested. Selection does not change the common IUlsSolver contract."
+    }
     switch ($Algorithm.Group) {
         "heuristic" { return "The method scans the planning horizon and constructs replenishment cycles according to its published decision rule. The library then reconstructs production, inventory, setups and cost components through the common heuristic solution builder." }
         "optimization" { return "The method builds its portable linear or mixed-integer formulation, automatically selects an available engine in the CPLEX -> Gurobi -> Xpress -> CBC priority order, solves the model, normalizes numerical values and reconstructs a UlsSolution that is checked independently." }

@@ -48,6 +48,7 @@ Console.WriteLine(result.ObjectiveValue);
 
 > **New to the library?** Open the [Getting Started guide](https://lemoine-or.github.io/ULSAlgorithms/api/getting_started.html).  
 > **Looking for a method?** Every algorithm below opens a dedicated, uniform documentation page.
+> **Recommended exact default:** use `AdaptiveExactUlsSolver` when calling the library as a reusable subproblem and you do not want application code to choose between specialized and general exact algorithms.
 
 ## Choose a family
 
@@ -67,6 +68,7 @@ Click any panel to open its dedicated page: description, technical specification
 ### Exact algorithms — dynamic programming & specialized methods
 
 <table>
+<tr><td colspan="2"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/adaptiveexactulssolver.html"><strong>Adaptive exact selection</strong></a><br><sub>Recommended automatic exact entry point</sub><br><code>AdaptiveExactUlsSolver</code> - uses the linear Wagner-Whitin specialization when applicable and a general O(T log T) exact fallback otherwise.</td></tr>
 <tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/wagnerwhitinclassicalsolver.html"><strong>Wagner–Whitin classical</strong></a><br><sub>Exact</sub><br><code>WagnerWhitinClassicalSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/wagnerwhitinevanssolver.html"><strong>Wagner–Whitin / Evans</strong></a><br><sub>Exact</sub><br><code>WagnerWhitinEvansSolver</code></td></tr>
 <tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/wagnerwhitinsolver.html"><strong>Wagner–Whitin linear</strong></a><br><sub>Exact</sub><br><code>WagnerWhitinSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/wagelmansgeneralsolver.html"><strong>Wagelmans general</strong></a><br><sub>Exact</sub><br><code>WagelmansGeneralSolver</code></td></tr>
 <tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/federgruentzursolver.html"><strong>Federgruen–Tzur general</strong></a><br><sub>Exact</sub><br><code>FedergruenTzurSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/federgruentzurnospeculativemotivesolver.html"><strong>Federgruen–Tzur linear (NSM)</strong></a><br><sub>Exact</sub><br><code>FedergruenTzurNoSpeculativeMotiveSolver</code></td></tr>
