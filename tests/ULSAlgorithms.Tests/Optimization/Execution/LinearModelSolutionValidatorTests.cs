@@ -62,6 +62,97 @@ public sealed class LinearModelSolutionValidatorTests
             validation.MaximumIntegralityViolation > 0.0);
     }
 
+    [Fact]
+    public void Validator_AcceptsTinyScaledResidualOnLargeConstraint()
+    {
+        LinearModel model =
+            BuildScaledEqualityModel();
+
+        LinearModelSolutionValidation validation =
+            LinearModelSolutionValidator.Validate(
+                model,
+                new Dictionary<int, double>
+                {
+                    [0] = 40.0000004
+                },
+                feasibilityTolerance: 1.0e-7,
+                integralityTolerance: 1.0e-8);
+
+        Assert.True(
+            validation.IsFeasible);
+
+        Assert.InRange(
+            validation.MaximumConstraintViolation,
+            3.9e-7,
+            4.1e-7);
+    }
+
+    [Fact]
+    public void Validator_StillRejectsMaterialScaledConstraintViolation()
+    {
+        LinearModel model =
+            BuildScaledEqualityModel();
+
+        LinearModelSolutionValidation validation =
+            LinearModelSolutionValidator.Validate(
+                model,
+                new Dictionary<int, double>
+                {
+                    [0] = 40.01
+                },
+                feasibilityTolerance: 1.0e-7,
+                integralityTolerance: 1.0e-8);
+
+        Assert.False(
+            validation.IsFeasible);
+
+        Assert.True(
+            validation.MaximumConstraintViolation > 0.009);
+    }
+
+    [Fact]
+    public void Validator_DoesNotScaleTinyZeroRightHandSideRows()
+    {
+        LinearModel model =
+            new(
+                "zero-rhs",
+                [
+                    new LinearVariable(
+                        0,
+                        "x",
+                        LinearVariableType.Continuous,
+                        -1.0,
+                        1.0)
+                ],
+                [
+                    new LinearConstraint(
+                        "zero",
+                        [
+                            new LinearTerm(
+                                0,
+                                1.0)
+                        ],
+                        LinearConstraintSense.Equal,
+                        0.0)
+                ],
+                new LinearObjective(
+                    [],
+                    constant: 0.0));
+
+        LinearModelSolutionValidation validation =
+            LinearModelSolutionValidator.Validate(
+                model,
+                new Dictionary<int, double>
+                {
+                    [0] = 4.0e-7
+                },
+                feasibilityTolerance: 1.0e-7,
+                integralityTolerance: 1.0e-8);
+
+        Assert.False(
+            validation.IsFeasible);
+    }
+
     private static LinearModel BuildModel()
     {
         return new LinearModel(
@@ -96,5 +187,37 @@ public sealed class LinearModelSolutionValidatorTests
                     new LinearTerm(1, 5.0)
                 ],
                 constant: 5.0));
+    }
+
+    private static LinearModel BuildScaledEqualityModel()
+    {
+        return new LinearModel(
+            "scaled-validation",
+            [
+                new LinearVariable(
+                    0,
+                    "x",
+                    LinearVariableType.Continuous,
+                    0.0,
+                    100.0)
+            ],
+            [
+                new LinearConstraint(
+                    "demand-balance",
+                    [
+                        new LinearTerm(
+                            0,
+                            1.0)
+                    ],
+                    LinearConstraintSense.Equal,
+                    40.0)
+            ],
+            new LinearObjective(
+                [
+                    new LinearTerm(
+                        0,
+                        1.0)
+                ],
+                constant: 0.0));
     }
 }

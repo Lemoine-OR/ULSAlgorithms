@@ -10,6 +10,14 @@ public static class LinearModelSolutionValidator
     /// <summary>
     /// Validates bounds, integrality, constraints and objective reconstruction.
     /// </summary>
+    /// <remarks>
+    /// Constraint feasibility uses a mixed absolute/relative policy. The
+    /// configured feasibility tolerance is multiplied by the scale of each
+    /// row, where the scale is the maximum of 1, the absolute right-hand side,
+    /// and the absolute sum of evaluated row terms. This keeps small rows
+    /// protected by the absolute tolerance while avoiding false rejection of
+    /// numerically valid solver output on larger rows.
+    /// </remarks>
     public static LinearModelSolutionValidation Validate(
         LinearModel model,
         IReadOnlyDictionary<int, double> values,
@@ -39,6 +47,7 @@ public static class LinearModelSolutionValidator
         double maxBoundViolation = 0.0;
         double maxIntegralityViolation = 0.0;
         double maxConstraintViolation = 0.0;
+        double maxConstraintNormalizedViolation = 0.0;
 
         foreach (LinearVariable variable in model.Variables)
         {
@@ -120,10 +129,27 @@ public static class LinearModelSolutionValidator
                             $"Unsupported constraint sense '{constraint.Sense}'.")
                 };
 
+            double rowScale =
+                EvaluateConstraintScale(
+                    constraint,
+                    values);
+
+            double normalizedViolation =
+                double.IsFinite(violation) &&
+                double.IsFinite(rowScale) &&
+                rowScale > 0.0
+                    ? violation / rowScale
+                    : double.PositiveInfinity;
+
             maxConstraintViolation =
                 Math.Max(
                     maxConstraintViolation,
                     violation);
+
+            maxConstraintNormalizedViolation =
+                Math.Max(
+                    maxConstraintNormalizedViolation,
+                    normalizedViolation);
         }
 
         double objective =
@@ -135,7 +161,7 @@ public static class LinearModelSolutionValidator
         bool feasible =
             double.IsFinite(objective) &&
             maxBoundViolation <= feasibilityTolerance &&
-            maxConstraintViolation <= feasibilityTolerance &&
+            maxConstraintNormalizedViolation <= feasibilityTolerance &&
             maxIntegralityViolation <= integralityTolerance;
 
         if (maxBoundViolation > feasibilityTolerance)
@@ -144,11 +170,12 @@ public static class LinearModelSolutionValidator
                 $"Maximum bound violation is {maxBoundViolation:R}.");
         }
 
-        if (maxConstraintViolation > feasibilityTolerance)
+        if (maxConstraintNormalizedViolation > feasibilityTolerance)
         {
             diagnostics.Add(
                 $"Maximum constraint violation is " +
-                $"{maxConstraintViolation:R}.");
+                $"{maxConstraintViolation:R}; normalized violation is " +
+                $"{maxConstraintNormalizedViolation:R}.");
         }
 
         if (maxIntegralityViolation > integralityTolerance)
@@ -171,6 +198,36 @@ public static class LinearModelSolutionValidator
             maxIntegralityViolation,
             maxConstraintViolation,
             diagnostics);
+    }
+
+    private static double EvaluateConstraintScale(
+        LinearConstraint constraint,
+        IReadOnlyDictionary<int, double> values)
+    {
+        double absoluteTermSum = 0.0;
+
+        foreach (LinearTerm term in constraint.Terms)
+        {
+            if (!values.TryGetValue(
+                    term.VariableId,
+                    out double value) ||
+                !double.IsFinite(value))
+            {
+                return double.NaN;
+            }
+
+            absoluteTermSum +=
+                Math.Abs(
+                    term.Coefficient *
+                    value);
+        }
+
+        return Math.Max(
+            1.0,
+            Math.Max(
+                Math.Abs(
+                    constraint.RightHandSide),
+                absoluteTermSum));
     }
 
     private static double EvaluateTerms(

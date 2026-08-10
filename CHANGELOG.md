@@ -6,7 +6,13 @@ The project follows Semantic Versioning from the 1.0.0 release onward.
 
 ## [Unreleased]
 
-No unreleased changes.
+### Added
+- Real COIN-OR CBC end-to-end qualification for all six public solver-backed ULS strategies.
+- Linux CI and pre-release qualification install the Ubuntu `coinor-cbc` package and force explicit CBC execution without fallback.
+
+### Validation
+- The CBC qualification compares all four mathematical formulations and both `(l,S)` cutting-plane strategies against the self-contained `adaptive-exact` oracle on a deterministic instance with known objective 680.
+- The qualification verifies `Optimal` status, finite objective agreement, a reconstructed ULS solution, and recorded CBC provenance.
 
 ## [0.28.0] - 2026-08-10
 

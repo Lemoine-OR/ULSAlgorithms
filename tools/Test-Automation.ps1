@@ -33,7 +33,8 @@ $required = @(
     'tools/Test-SolverCatalog.ps1',
     'tools/ULSAlgorithms.CatalogExporter/ULSAlgorithms.CatalogExporter.csproj',
     'tools/ULSAlgorithms.PublicApiExporter/ULSAlgorithms.PublicApiExporter.csproj',
-    'tools/ULSAlgorithms.PortabilitySmoke/ULSAlgorithms.PortabilitySmoke.csproj'
+    'tools/ULSAlgorithms.PortabilitySmoke/ULSAlgorithms.PortabilitySmoke.csproj',
+    'tools/ULSAlgorithms.CbcIntegrationSmoke/ULSAlgorithms.CbcIntegrationSmoke.csproj'
 )
 
 foreach ($relative in $required) {

@@ -175,51 +175,88 @@ public sealed class CoinOrCbcLinearModelExecutor :
         }
     }
 
-    private static LinearModelSolveStatus MapStatus(
+    /// <summary>
+    /// Normalizes the status reported by CBC.
+    /// </summary>
+    /// <remarks>
+    /// CBC can emit transient simplex/presolve diagnostics containing words
+    /// such as "infeasible" before subsequently producing an optimal solution.
+    /// The solution-file header is therefore authoritative when it contains a
+    /// terminal status. A valid candidate solution also takes precedence over
+    /// generic diagnostic text from earlier phases of the solve.
+    /// </remarks>
+    internal static LinearModelSolveStatus MapStatus(
         string output,
         string solutionHeader,
         bool solutionExists,
         int exitCode)
     {
-        string combined =
-            output +
-            Environment.NewLine +
-            solutionHeader;
-
-        if (combined.Contains(
-                "infeasible or unbounded",
-                StringComparison.OrdinalIgnoreCase))
-        {
-            return LinearModelSolveStatus.InfeasibleOrUnbounded;
-        }
-
-        if (combined.Contains(
-                "infeasible",
-                StringComparison.OrdinalIgnoreCase))
-        {
-            return LinearModelSolveStatus.Infeasible;
-        }
-
-        if (combined.Contains(
-                "unbounded",
-                StringComparison.OrdinalIgnoreCase))
-        {
-            return LinearModelSolveStatus.Unbounded;
-        }
-
-        if (combined.Contains(
-                "optimal solution found",
-                StringComparison.OrdinalIgnoreCase) ||
-            solutionHeader.StartsWith(
+        if (solutionHeader.StartsWith(
                 "Optimal",
                 StringComparison.OrdinalIgnoreCase))
         {
             return LinearModelSolveStatus.Optimal;
         }
 
+        if (solutionHeader.Contains(
+                "infeasible or unbounded",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return LinearModelSolveStatus.InfeasibleOrUnbounded;
+        }
+
+        if (solutionHeader.Contains(
+                "infeasible",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return LinearModelSolveStatus.Infeasible;
+        }
+
+        if (solutionHeader.Contains(
+                "unbounded",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return LinearModelSolveStatus.Unbounded;
+        }
+
         if (solutionExists)
         {
+            if (output.Contains(
+                    "optimal solution found",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return LinearModelSolveStatus.Optimal;
+            }
+
             return LinearModelSolveStatus.Feasible;
+        }
+
+        if (output.Contains(
+                "infeasible or unbounded",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return LinearModelSolveStatus.InfeasibleOrUnbounded;
+        }
+
+        if (output.Contains(
+                "infeasible",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return LinearModelSolveStatus.Infeasible;
+        }
+
+        if (output.Contains(
+                "unbounded",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return LinearModelSolveStatus.Unbounded;
+        }
+
+        if (output.Contains(
+                "optimal solution found",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return LinearModelSolveStatus.Optimal;
         }
 
         return exitCode == 0
