@@ -29,17 +29,52 @@
 
 The repository deliberately keeps historically important methods as **separate public implementations**. A classical Wagner–Whitin dynamic program, a low-storage Evans implementation, geometric dynamic programs, planning-horizon accelerations, network formulations, parallel methods and classical heuristics therefore remain independently testable, benchmarkable and citable.
 
-The current library contains:
+The current algorithm catalog contains:
 
 - **16 exact algorithms**;
 - **11 heuristics**;
-- **27 public solving strategies** sharing `IUlsSolver`;
-- deterministic and randomized cross-validation against independent exact references;
-- BenchmarkDotNet performance suites;
-- versioned Doxygen API documentation;
-- validated GitHub Releases with checksums and reproducibility metadata.
+- **27 public solving strategies** sharing `IUlsSolver`.
+
+The infrastructure also defines a common architecture for future **solver-backed formulations and cutting-plane methods**, including automatic optimization-solver selection and complete cut-generation traceability.
 
 Developed and maintained by **David Lemoine — Lemoine-OR**.
+
+## Optimization solver policy
+
+Any ULSAlgorithms method that requires a mathematical optimizer uses a common selection layer.
+
+With `SolverKind.Automatic`, the default priority is:
+
+```text
+1. IBM ILOG CPLEX
+2. Gurobi
+3. FICO Xpress
+4. COIN-OR CBC
+```
+
+This order intentionally matches LotSizingDataModel.
+
+Selection is based on **real adapter availability and required capabilities**. An installed solver that cannot load, has no usable license, or lacks a required capability is skipped with diagnostics.
+
+The caller may still explicitly request a concrete solver and may disable fallback.
+
+## Cutting-plane traceability
+
+Solver-backed cutting-plane algorithms must expose the inequalities they generate.
+
+For `(l,S)` cuts the public trace records:
+
+- `l` and `S`;
+- all nonzero coefficients;
+- sense and right-hand side;
+- separation procedure (`WagnerWhitin` or `General`);
+- iteration;
+- violation and efficacy;
+- whether the cut was actually added;
+- duplicate / below-tolerance / invalid / solver-rejected reason;
+- solver constraint name.
+
+`CutGenerationReport` aggregates generated and added counts while retaining the complete ordered cut list.
 
 ## Documentation
 
@@ -47,21 +82,13 @@ The public portal is the recommended entry point:
 
 ### [Open the ULSAlgorithms documentation portal](https://lemoine-or.github.io/ULSAlgorithms/)
 
-The portal is organized for algorithm users and researchers rather than around the raw source tree:
+In addition to algorithm documentation, see:
 
-1. **Getting Started**
-2. **ULS Problem & Notation**
-3. **Algorithm Catalog**
-4. **Exact Algorithms**
-5. **Heuristics**
-6. **Algorithm Selection**
-7. **Complexity & Applicability**
-8. **Validation & Benchmarks**
-9. **API Reference**
-10. **Scientific References**
-11. **Releases & Reproducibility**
-
-Each algorithm is documented with its family, assumptions, asymptotic complexity, scientific source, implementation notes and validation strategy.
+- **Optimization Solver Integration**
+- **Cut Generation Traceability**
+- **Validation & Benchmarks**
+- **Scientific References**
+- **Releases & Reproducibility**
 
 ## Quick start
 
@@ -71,10 +98,10 @@ using ULSAlgorithms.Exact.WagnerWhitin;
 using ULSAlgorithms.Models;
 
 var problem = new UlsProblem(
-    demands:            [20.0, 30.0, 25.0, 40.0],
-    setupCosts:         [100.0, 100.0, 100.0, 100.0],
-    unitProductionCosts:[  0.0,   0.0,   0.0,   0.0],
-    holdingCosts:       [  2.0,   2.0,   2.0,   0.0]);
+    demands:             [20.0, 30.0, 25.0, 40.0],
+    setupCosts:          [100.0, 100.0, 100.0, 100.0],
+    unitProductionCosts: [  0.0,   0.0,   0.0,   0.0],
+    holdingCosts:        [  2.0,   2.0,   2.0,   0.0]);
 
 IUlsSolver solver = new WagnerWhitinSolver();
 
@@ -85,7 +112,7 @@ Console.WriteLine($"Status: {result.Status}");
 Console.WriteLine($"Objective: {result.ObjectiveValue}");
 ```
 
-All exact methods and heuristics use the same interface:
+All exact methods and heuristics use:
 
 ```csharp
 UlsSolveResult Solve(
@@ -93,7 +120,23 @@ UlsSolveResult Solve(
     CancellationToken cancellationToken = default);
 ```
 
-That common contract allows algorithms to be exchanged as Strategy implementations without changing the calling code.
+## Automatic optimization-solver selection
+
+Solver-backed methods use the shared optimization layer:
+
+```csharp
+var options = new SolverSelectionOptions();
+options.RequiredCapabilities.Add(
+    SolverCapability.MixedIntegerLinearProgramming);
+
+var selection = await new SolverSelectionService().SelectAsync(
+    SolverKind.Automatic,
+    registry,
+    options,
+    cancellationToken);
+```
+
+Concrete provider adapters perform the real machine / native-library / license check.
 
 ## Algorithm families
 
@@ -108,26 +151,21 @@ That common contract allows algorithms to be exchanged as Strategy implementatio
 | Parallel exact DP | `LyuLeeParallelSolver` |
 | Classical heuristics | Silver–Meal, LUC, PPB, Groff, POQ, Freeland–Colley, IPPA, Wemmerlöv variants |
 
-The complete applicability and complexity matrix is maintained in `docs/algorithm-catalog.json` and rendered automatically in the documentation.
-
 ## Repository architecture
 
 ```text
 ULSAlgorithms/
 ├── src/ULSAlgorithms/
-│   ├── Abstractions/      common solver contract
+│   ├── Abstractions/      common ULS strategy contract
 │   ├── Models/            validated ULS problem
 │   ├── Results/           solution and solve-status model
 │   ├── Exact/             exact algorithms by family
-│   └── Heuristics/        heuristic strategies
+│   ├── Heuristics/        heuristic strategies
+│   ├── Optimization/      external-solver selection and provenance
+│   └── CuttingPlanes/     solver-independent cut traceability
 ├── tests/                 xUnit validation and cross-checks
 ├── benchmarks/            BenchmarkDotNet suites
-├── docs/
-│   ├── pages/             curated scientific/user documentation
-│   ├── portal/            public landing portal
-│   ├── assets/            project identity and Doxygen assets
-│   ├── brand/             shared algorithm-project identity guide
-│   └── algorithm-catalog.json
+├── docs/                  portal, API, scientific documentation
 ├── build/                 validated build and release automation
 └── tools/                 versioning and tooling bootstrap scripts
 ```
@@ -136,35 +174,29 @@ ULSAlgorithms/
 
 Fast algorithms are useful only if their result can be trusted.
 
-The project therefore combines:
+The project combines deterministic reference instances, randomized campaigns,
+independent exact oracles, cross-validation, cancellation tests, applicability
+tests and BenchmarkDotNet measurements.
 
-- deterministic reference instances;
-- randomized instance campaigns;
-- independent quadratic dynamic-programming oracles where appropriate;
-- cross-validation between mathematically independent exact implementations;
-- explicit applicability tests for restricted algorithms;
-- cancellation tests;
-- objective and feasibility reconstruction;
-- BenchmarkDotNet performance measurements.
+Solver-backed infrastructure is tested separately for deterministic selection
+order, capability filtering, fallback behavior and complete generated/added cut
+accounting.
 
-Heuristics return **`Feasible`**, never `Optimal`. Exact methods return **`Optimal`** only after completing an exact algorithm.
+Heuristics return **`Feasible`**, never `Optimal`. Exact methods return
+**`Optimal`** only after completing an exact algorithm.
 
 ## Build from source
 
-Requirements for the validated code build:
+Requirements:
 
 - .NET 10 SDK;
 - PowerShell.
 
 ```powershell
-git clone https://github.com/Lemoine-OR/ULSAlgorithms.git
-cd ULSAlgorithms
-
-powershell -ExecutionPolicy Bypass `
-  -File ".\build\Build-Validated.ps1"
+powershell -ExecutionPolicy Bypass -File ".\build\Build-Validated.ps1"
 ```
 
-For the complete documentation build, Graphviz and Doxygen are installed through the repository tooling:
+For documentation:
 
 ```powershell
 .\tools\Install-Graphviz.ps1
@@ -172,25 +204,22 @@ For the complete documentation build, Graphviz and Doxygen are installed through
 .\docs\build-documentation.ps1
 ```
 
-The generated portal is written to:
-
-```text
-Documentation/site/index.html
-```
-
 ## Releases and reproducibility
 
-Public releases are created only through the validated GitHub Actions release workflow.
+Public releases are created only through the validated GitHub Actions release
+workflow.
 
-A release contains the binary ZIP, documentation ZIP, build metadata, manifests and SHA-256 checksums. The build version and Git commit are injected into the documentation portal so a published API snapshot can always be traced back to its exact source revision.
+A release contains the binary ZIP, documentation ZIP, build metadata,
+manifests and SHA-256 checksums. Solver-backed execution reports also retain the
+concrete solver and adapter identity selected on the execution machine.
 
 ## Scientific provenance
 
-ULSAlgorithms is not intended to hide the literature behind a single black-box solver. Public algorithms preserve their scientific identity.
+ULSAlgorithms does not hide the literature behind a single black-box solver.
+Public algorithms preserve their scientific identity, assumptions, complexity
+and implementation provenance.
 
-When an implementation materially follows a paper, the source documentation records the publication and—when available—the DOI. When an implementation is a modern reconstruction rather than a line-by-line transcription of historical code, that distinction is stated explicitly.
-
-See the [Scientific References](https://lemoine-or.github.io/ULSAlgorithms/api/scientific_references.html) page for the curated bibliography.
+See the [Scientific References](https://lemoine-or.github.io/ULSAlgorithms/api/scientific_references.html).
 
 ---
 

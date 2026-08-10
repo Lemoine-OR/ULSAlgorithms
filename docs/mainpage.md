@@ -20,6 +20,11 @@ This API site is the technical reference generated directly from the C# source a
 - @subpage heuristics
 - @subpage complexity_applicability
 
+## Solver-backed methods
+
+- @subpage optimization_solver_integration
+- @subpage cut_generation_traceability
+
 ## Engineering and science
 
 - @subpage validation_benchmarks

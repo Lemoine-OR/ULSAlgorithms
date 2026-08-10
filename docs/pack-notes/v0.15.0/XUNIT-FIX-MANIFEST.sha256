@@ -1,0 +1,3 @@
+cc0a21b9765acab3040e6222fb13d982e05e60568dd592f6a69df98b4b0bc5be  docs/pack-notes/v0.15.0/APPLY-XUNIT-FIX.md
+37ffe4864a9e10ae2b3a924bcccad791db2059a6346737604a4f0b711b8a6cc1  tests/ULSAlgorithms.Tests/CuttingPlanes/CutGenerationReportTests.cs
+1ef1b34f89e46e591e87c3786d3b23cc81f21ca9567fe98d4be67ae47e921aa5  tests/ULSAlgorithms.Tests/Optimization/SolverSelectionTests.cs
