@@ -32,37 +32,54 @@ The library now contains:
 
 - **16 direct/native exact algorithms**;
 - **4 solver-backed exact formulation strategies**;
-- **20 exact `IUlsSolver` strategies in total**;
+- **2 exact `(l,S)` cutting-plane strategies**;
+- **22 exact `IUlsSolver` strategies in total**;
 - **11 heuristics**;
-- **31 public solving strategies**;
+- **33 public solving strategies**;
 - automatic **CPLEX → Gurobi → Xpress → CBC** discovery;
-- a provider-independent linear-model execution layer;
-- two-level independent solution validation;
-- cutting-plane traceability infrastructure.
+- solver-independent mathematical formulations and execution;
+- numerical normalization and two-level independent checking;
+- complete cut-generation traceability.
 
 Developed and maintained by **David Lemoine — Lemoine-OR**.
 
-## Use a formulation like any other exact solver
+## Classical `(l,S)` cutting planes
+
+v0.20.0 adds two separate exact strategies:
+
+```text
+GeneralLsCuttingPlaneSolver
+WagnerWhitinLsCuttingPlaneSolver
+```
+
+The general separator performs exact combinatorial separation over the
+classical exponential `(l,S)` family in O(T²) time by selecting, for every
+period, the smaller of the production term and the setup-covered-demand term.
+
+The Wagner-Whitin separator scans the O(T²) prefix-S specialization equivalent
+to:
+
+```text
+I[k-1] + Σ(j=k..l) d[j,l] y[j] >= d[k,l]
+```
+
+and requires the no-speculative-motive cost condition.
+
+## Use
 
 ```csharp
-using ULSAlgorithms.Abstractions;
-using ULSAlgorithms.Exact.Formulations;
-
 IUlsSolver solver =
-    new AggregateInventoryFormulationSolver();
+    new GeneralLsCuttingPlaneSolver();
 
 UlsSolveResult result =
     solver.Solve(problem);
 ```
 
-The same common `IUlsSolver` contract is used by Wagner–Whitin, Wagelmans,
-Federgruen–Tzur, classical heuristics and the solver-backed formulations.
-
-## Asynchronous solver-backed API
+or asynchronously:
 
 ```csharp
 IAsyncUlsSolver solver =
-    new FacilityLocationFormulationSolver();
+    new WagnerWhitinLsCuttingPlaneSolver();
 
 UlsSolveResult result =
     await solver.SolveAsync(
@@ -70,103 +87,60 @@ UlsSolveResult result =
         cancellationToken);
 ```
 
-The four public formulation strategies are:
-
-```text
-AggregateInventoryFormulationSolver
-FacilityLocationFormulationSolver
-ShortestPathFormulationSolver
-InventoryEliminatedFormulationSolver
-```
-
-## Solver provenance
-
-When the result comes from a formulation strategy:
+## See every generated constraint
 
 ```csharp
-if (result is SolverBackedUlsSolveResult solverBacked)
+if (result is CuttingPlaneUlsSolveResult r)
 {
-    Console.WriteLine(solverBacked.FormulationKind);
-    Console.WriteLine(
-        solverBacked.OptimizationSolver?.SelectedSolver);
-    Console.WriteLine(
-        solverBacked.OptimizationSolver?.SolverVersion);
+    foreach (CutRecord cut in
+             r.CuttingPlaneExecution.Cuts.Cuts)
+    {
+        Console.WriteLine(
+            $"{cut.Iteration} | " +
+            $"{cut.Definition} | " +
+            $"{cut.Disposition} | " +
+            $"{cut.DispositionReason}");
+    }
 }
 ```
 
-Thus a published benchmark can retain both the mathematical formulation and the
-actual optimization engine used on the machine.
+Each record retains `l`, `S`, coefficients, RHS, sense, violation, efficacy,
+iteration, disposition and the exact row name inserted into the portable model.
 
-## Two validation layers
-
-A solver-backed solution must pass:
+## Exact architecture
 
 ```text
-native solver
+root aggregate LP
     ↓
-portable LinearModel checker
+(l,S) separation
     ↓
-formulation → UlsSolution reconstruction
+add unique violated cuts
     ↓
-ULS-domain checker
+repeat
     ↓
-objective agreement check
+strengthened final MILP
     ↓
-Optimal / Feasible
+UlsSolution reconstruction
+    ↓
+independent ULS checker
 ```
 
-The public `UlsSolutionValidator` independently checks material balance, final
-inventory, setup linking and every cost component.
-
-## Numerical normalization
-
-The numerical cleanup introduced in v0.18.0 is retained:
-
-```text
-zero tolerance          1e-8
-integrality tolerance   1e-7
-near-integer tolerance  1e-8
-```
-
-Small numerical residues are cleaned; materially incorrect values are never
-silently rounded.
-
-## Automatic solver policy
-
-Solver-backed methods use:
-
-```text
-1. IBM ILOG CPLEX
-2. Gurobi
-3. FICO Xpress
-4. COIN-OR CBC
-```
-
-No commercial solver assembly is referenced at compile time.
-
-## Cutting-plane traceability
-
-The existing cutting-plane report records every generated `(l,S)` inequality,
-whether it was added, its iteration, violation, efficacy, coefficients,
-disposition and solver row name.
-
-With the formulation strategies and reconstruction layer complete, the next
-solver-backed algorithm family can reuse the same execution and validation
-pipeline.
-
-## Build from source
-
-```powershell
-powershell -ExecutionPolicy Bypass -File ".\build\Build-Validated.ps1"
-```
+The final MILP uses the same solver selected during root separation. Automatic
+priority remains CPLEX, Gurobi, Xpress, CBC.
 
 ## Scientific provenance
 
-ULSAlgorithms keeps direct algorithms and mathematical formulations as separate
-public implementations so their assumptions, scientific sources, complexity and
-computational behavior remain independently citable and benchmarkable.
+Main `(l,S)` references:
 
-See the [Scientific References](https://lemoine-or.github.io/ULSAlgorithms/api/scientific_references.html).
+- Barany, Van Roy & Wolsey (1984),
+  *Uncapacitated lot-sizing: the convex hull of solutions*,
+  DOI `10.1007/BFb0121006`.
+- Barany, Van Roy & Wolsey (1984),
+  *Strong Formulations for Multi-Item Capacitated Lot Sizing*,
+  DOI `10.1287/mnsc.30.10.1255`.
+- Pochet & Wolsey (1994),
+  *Polyhedra for lot-sizing with Wagner-Whitin costs*,
+  DOI `10.1007/BF01582225`.
 
 ---
 

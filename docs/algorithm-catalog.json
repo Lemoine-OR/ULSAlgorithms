@@ -241,6 +241,30 @@
       "publication": "Brahimi et al. (2006)",
       "doi": "10.1016/j.ejor.2004.01.054",
       "implementation": "Aggregate x/y formulation with inventory algebraically eliminated"
+    },
+    {
+      "name": "General (l,S) cutting-plane",
+      "class": "GeneralLsCuttingPlaneSolver",
+      "family": "Cutting planes / convex hull",
+      "time": "O(T²) separation per root iteration + solver",
+      "space": "O(T) separator + model/cuts",
+      "applicability": "General classical ULS",
+      "sourcePath": "src/ULSAlgorithms/Exact/CuttingPlanes/GeneralLsCuttingPlaneSolver.cs",
+      "publication": "Barany, Van Roy & Wolsey (1984)",
+      "doi": "10.1007/BFb0121006",
+      "implementation": "Exact general (l,S) separation + strengthened final MILP"
+    },
+    {
+      "name": "Wagner–Whitin (l,S) cutting-plane",
+      "class": "WagnerWhitinLsCuttingPlaneSolver",
+      "family": "Cutting planes / Wagner–Whitin",
+      "time": "O(T²) separation per root iteration + solver",
+      "space": "O(T) separator + model/cuts",
+      "applicability": "No speculative motive / Wagner–Whitin costs",
+      "sourcePath": "src/ULSAlgorithms/Exact/CuttingPlanes/WagnerWhitinLsCuttingPlaneSolver.cs",
+      "publication": "Pochet & Wolsey (1994)",
+      "doi": "10.1007/BF01582225",
+      "implementation": "O(T²) prefix-S Wagner–Whitin separation + strengthened final MILP"
     }
   ],
   "heuristics": [

@@ -28,6 +28,7 @@ This API site is the technical reference generated directly from the C# source a
 - @subpage solver_execution
 - @subpage formulation_solvers
 - @subpage cut_generation_traceability
+- @subpage ls_cutting_planes
 
 ## Engineering and science
 
