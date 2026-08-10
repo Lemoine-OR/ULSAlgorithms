@@ -30,6 +30,7 @@ $required = @(
     'tools/Get-DotNetProjects.ps1',
     'tools/Install-Doxygen.ps1',
     'tools/Get-ULSAlgorithmsVersion.ps1',
+    'tools/Test-ChangelogHistory.ps1',
     'tools/Test-CitationCff.ps1',
     'tools/Test-DocumentationGeneratorHardening.ps1',
     'tools/Test-NuGetConsumer.ps1',
@@ -60,6 +61,7 @@ if ($stale) {
     throw 'Automation still contains references to the previous repository product name.'
 }
 
+& (Join-Path $PSScriptRoot 'Test-ChangelogHistory.ps1')
 & (Join-Path $PSScriptRoot 'Test-CitationCff.ps1')
 & (Join-Path $PSScriptRoot 'Test-DocumentationGeneratorHardening.ps1')
 
