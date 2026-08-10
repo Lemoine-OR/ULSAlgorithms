@@ -19,11 +19,17 @@ namespace ULSAlgorithms.Selection;
 /// general <c>O(n log n)</c> exact algorithm.
 /// </para>
 /// <para>
+/// The no-speculative-motive condition is cached by the immutable
+/// <see cref="UlsProblem"/> during construction. Adaptive selection therefore
+/// adds no extra <c>O(n)</c> applicability scan before invoking the selected
+/// exact solver.
+/// </para>
+/// <para>
 /// The default general fallback is <see cref="WagelmansGeneralSolver"/>. The
-/// alternative <see cref="FedergruenTzurSolver"/> can be selected explicitly so
-/// BenchmarkDotNet campaigns can determine the best practical fallback on the
-/// target hardware and workload. No empirical threshold is hard-coded before
-/// reproducible measurements justify one.
+/// alternative <see cref="FedergruenTzurSolver"/> remains selectable explicitly
+/// for reproducible research and benchmarking. The v0.24 calibration campaign
+/// recorded in the v0.25 engineering notes found no practical crossover on the
+/// measured horizons, so no empirical threshold is introduced.
 /// </para>
 /// <para>
 /// References: A. Wagelmans, S. van Hoesel and A. Kolen, Operations Research
@@ -81,11 +87,15 @@ public sealed class AdaptiveExactUlsSolver : IUlsSolver
     /// </summary>
     /// <param name="problem">The validated ULS problem.</param>
     /// <returns>The selected exact strategy.</returns>
+    /// <remarks>
+    /// The applicability decision reuses the immutable profile cached by
+    /// <see cref="UlsProblem"/> and therefore does not rescan the horizon.
+    /// </remarks>
     public IUlsSolver SelectSolver(UlsProblem problem)
     {
         ArgumentNullException.ThrowIfNull(problem);
 
-        return WagnerWhitinSolver.IsApplicable(problem)
+        return problem.HasNoSpeculativeMotiveCosts
             ? _linearSolver
             : _generalSolver;
     }

@@ -39,10 +39,11 @@ public static class UlsProblemAnalyzer
     /// <returns>A compact immutable characteristic vector.</returns>
     /// <remarks>
     /// <para>
-    /// The no-speculative-motive condition tested here is
-    /// <c>p[t] + h[t] &gt;= p[t+1]</c>. When it holds for every adjacent pair,
-    /// the linear-time Wagner-Whitin specialization implemented by
-    /// <c>WagnerWhitinSolver</c> is applicable.
+    /// The no-speculative-motive condition is
+    /// <c>p[t] + h[t] &gt;= p[t+1]</c>. Its value is already cached by
+    /// <see cref="UlsProblem"/> during construction, so this analyzer reuses
+    /// the cached value while its linear pass computes the remaining
+    /// characteristics.
     /// </para>
     /// <para>
     /// Algorithmic basis: A. Wagelmans, S. van Hoesel and A. Kolen,
@@ -62,7 +63,6 @@ public static class UlsProblemAnalyzer
         var holdingCosts = problem.HoldingCosts;
 
         var positiveDemandPeriods = 0;
-        var noSpeculativeMotive = true;
         var constantSetup = true;
         var constantProduction = true;
         var constantHolding = true;
@@ -92,25 +92,13 @@ public static class UlsProblemAnalyzer
             {
                 constantHolding = false;
             }
-
-            if (period < horizon - 1)
-            {
-                var deliveredNextPeriod =
-                    productionCosts[period] + holdingCosts[period];
-
-                if (!double.IsFinite(deliveredNextPeriod) ||
-                    deliveredNextPeriod < productionCosts[period + 1])
-                {
-                    noSpeculativeMotive = false;
-                }
-            }
         }
 
         return new UlsProblemCharacteristics(
             horizon,
             problem.TotalDemand,
             positiveDemandPeriods,
-            noSpeculativeMotive,
+            problem.HasNoSpeculativeMotiveCosts,
             constantSetup,
             constantProduction,
             constantHolding);

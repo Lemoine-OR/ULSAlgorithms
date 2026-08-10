@@ -53,12 +53,27 @@ public sealed class UlsProblem
         _holdingCosts = holdingCosts.ToArray();
 
         var totalDemand = 0.0;
+        var noSpeculativeMotive = true;
+
         for (var period = 0; period < _demands.Length; period++)
         {
             totalDemand += _demands[period];
+
+            if (period < _demands.Length - 1)
+            {
+                var deliveredNextPeriod =
+                    _unitProductionCosts[period] + _holdingCosts[period];
+
+                if (!double.IsFinite(deliveredNextPeriod) ||
+                    deliveredNextPeriod < _unitProductionCosts[period + 1])
+                {
+                    noSpeculativeMotive = false;
+                }
+            }
         }
 
         TotalDemand = totalDemand;
+        HasNoSpeculativeMotiveCosts = noSpeculativeMotive;
     }
 
     /// <summary>
@@ -90,4 +105,15 @@ public sealed class UlsProblem
     /// Gets end-of-period unit holding costs by period.
     /// </summary>
     public ReadOnlySpan<double> HoldingCosts => _holdingCosts;
+
+    /// <summary>
+    /// Gets whether the immutable problem satisfies the no-speculative-motive
+    /// cost condition used by the linear Wagner-Whitin specialization.
+    /// </summary>
+    /// <remarks>
+    /// This value is computed while the constructor already scans the copied
+    /// input arrays. Internal strategy selection can therefore reuse it without
+    /// performing another planning-horizon scan.
+    /// </remarks>
+    internal bool HasNoSpeculativeMotiveCosts { get; }
 }

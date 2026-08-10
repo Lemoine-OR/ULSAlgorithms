@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>ULSAlgorithms.Benchmarks.AdaptiveExactSolverBenchmarks-20260810-170646</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet v0.15.8, Windows 11 (10.0.26100.8973/24H2/2024Update/HudsonValley)
+Intel Core i7-6900K CPU 3.20GHz (Skylake), 1 CPU, 16 logical and 8 physical cores
+.NET SDK 10.0.302
+  [Host]     : .NET 10.0.10 (10.0.10, 10.0.1026.32716), X64 RyuJIT x86-64-v3
+  DefaultJob : .NET 10.0.10 (10.0.10, 10.0.1026.32716), X64 RyuJIT x86-64-v3
+</code></pre>
+<pre><code></code></pre>
+
+<table>
+<thead><tr><th>Method </th><th>Horizon</th><th>Scenario</th><th>Mean  </th><th>Error</th><th>StdDev</th><th>Ratio</th><th>RatioSD</th><th>Gen0</th><th>Gen1</th><th>Allocated</th><th>Alloc Ratio</th>
+</tr>
+</thead><tbody><tr><td>AnalyzeOnly</td><td>100</td><td>General</td><td>215.7 ns</td><td>2.16 ns</td><td>2.02 ns</td><td>0.06</td><td>0.00</td><td>-</td><td>-</td><td>-</td><td>0.00</td>
+</tr><tr><td>DirectExact</td><td>100</td><td>General</td><td>3,433.1 ns</td><td>58.30 ns</td><td>54.53 ns</td><td>1.00</td><td>0.02</td><td>0.1793</td><td>-</td><td>1896 B</td><td>1.00</td>
+</tr><tr><td>AdaptiveExact</td><td>100</td><td>General</td><td>3,459.8 ns</td><td>62.34 ns</td><td>58.32 ns</td><td>1.01</td><td>0.02</td><td>0.1793</td><td>-</td><td>1896 B</td><td>1.00</td>
+</tr><tr><td>AnalyzeOnly</td><td>100</td><td>NSM</td><td>200.9 ns</td><td>3.77 ns</td><td>3.34 ns</td><td>0.08</td><td>0.00</td><td>-</td><td>-</td><td>-</td><td>0.00</td>
+</tr><tr><td>DirectExact</td><td>100</td><td>NSM</td><td>2,672.1 ns</td><td>53.42 ns</td><td>59.37 ns</td><td>1.00</td><td>0.03</td><td>0.1793</td><td>-</td><td>1896 B</td><td>1.00</td>
+</tr><tr><td>AdaptiveExact</td><td>100</td><td>NSM</td><td>2,672.3 ns</td><td>39.68 ns</td><td>37.12 ns</td><td>1.00</td><td>0.03</td><td>0.1793</td><td>-</td><td>1896 B</td><td>1.00</td>
+</tr><tr><td>AnalyzeOnly</td><td>1000</td><td>General</td><td>2,009.1 ns</td><td>24.24 ns</td><td>20.24 ns</td><td>0.05</td><td>0.00</td><td>-</td><td>-</td><td>-</td><td>0.00</td>
+</tr><tr><td>DirectExact</td><td>1000</td><td>General</td><td>40,179.5 ns</td><td>557.97 ns</td><td>521.92 ns</td><td>1.00</td><td>0.02</td><td>1.5869</td><td>-</td><td>17192 B</td><td>1.00</td>
+</tr><tr><td>AdaptiveExact</td><td>1000</td><td>General</td><td>40,263.3 ns</td><td>724.94 ns</td><td>642.64 ns</td><td>1.00</td><td>0.02</td><td>1.5869</td><td>-</td><td>17192 B</td><td>1.00</td>
+</tr><tr><td>AnalyzeOnly</td><td>1000</td><td>NSM</td><td>1,731.2 ns</td><td>23.99 ns</td><td>20.03 ns</td><td>0.07</td><td>0.00</td><td>-</td><td>-</td><td>-</td><td>0.00</td>
+</tr><tr><td>DirectExact</td><td>1000</td><td>NSM</td><td>25,746.1 ns</td><td>468.16 ns</td><td>437.91 ns</td><td>1.00</td><td>0.02</td><td>1.6174</td><td>-</td><td>17192 B</td><td>1.00</td>
+</tr><tr><td>AdaptiveExact</td><td>1000</td><td>NSM</td><td>25,643.0 ns</td><td>351.30 ns</td><td>311.42 ns</td><td>1.00</td><td>0.02</td><td>1.6174</td><td>-</td><td>17192 B</td><td>1.00</td>
+</tr><tr><td>AnalyzeOnly</td><td>10000</td><td>General</td><td>18,117.1 ns</td><td>358.29 ns</td><td>335.14 ns</td><td>0.04</td><td>0.00</td><td>-</td><td>-</td><td>-</td><td>0.00</td>
+</tr><tr><td>DirectExact</td><td>10000</td><td>General</td><td>480,207.0 ns</td><td>8,371.49 ns</td><td>7,830.70 ns</td><td>1.00</td><td>0.02</td><td>16.1133</td><td>3.4180</td><td>170192 B</td><td>1.00</td>
+</tr><tr><td>AdaptiveExact</td><td>10000</td><td>General</td><td>493,627.3 ns</td><td>5,449.88 ns</td><td>5,097.82 ns</td><td>1.03</td><td>0.02</td><td>15.6250</td><td>2.9297</td><td>170192 B</td><td>1.00</td>
+</tr><tr><td>AnalyzeOnly</td><td>10000</td><td>NSM</td><td>17,037.0 ns</td><td>320.52 ns</td><td>314.79 ns</td><td>0.05</td><td>0.00</td><td>-</td><td>-</td><td>-</td><td>0.00</td>
+</tr><tr><td>DirectExact</td><td>10000</td><td>NSM</td><td>365,232.2 ns</td><td>6,482.27 ns</td><td>5,746.36 ns</td><td>1.00</td><td>0.02</td><td>16.1133</td><td>3.4180</td><td>170192 B</td><td>1.00</td>
+</tr><tr><td>AdaptiveExact</td><td>10000</td><td>NSM</td><td>366,674.1 ns</td><td>4,616.05 ns</td><td>4,092.01 ns</td><td>1.00</td><td>0.02</td><td>16.1133</td><td>3.4180</td><td>170192 B</td><td>1.00</td>
+</tr></tbody></table>
+</body>
+</html>
