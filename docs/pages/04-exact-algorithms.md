@@ -2,56 +2,28 @@
 
 # Exact Algorithms
 
-ULSAlgorithms groups exact methods by **algorithmic architecture**, not only by chronology.
+An exact strategy returns an optimal ULS solution when its documented applicability conditions are satisfied.
 
-## Wagner–Whitin dynamic-programming family
+The direct exact methods are grouped by mechanism rather than by release:
 
-This family keeps the classical regeneration-interval recurrence visible.
+## Dynamic programming and geometric acceleration
 
-Representative strategies include:
+Wagner–Whitin, Evans, Wagelmans, Federgruen–Tzur, Aggarwal–Park and related linear or O(T log T) variants.
 
-- `WagnerWhitinClassicalSolver`;
-- `WagnerWhitinEvansSolver`;
-- `SaydamMcKnewFastWagnerWhitinSolver`;
-- `BahlTajPlanningHorizonSolver`;
-- `HeadyZhuEconomicPartPeriodSolver`;
-- `SadjadiAryanezhadSadeghiSolver`.
+## Planning-horizon methods
 
-The implementations deliberately expose different memory/performance trade-offs.
+Bahl–Taj, Heady–Zhu and Sadjadi–Aryanezhad–Sadeghi use data-dependent pruning or horizon reduction while preserving exactness under their stated assumptions.
 
-## Geometric and data-structure accelerated DP
+## Parallel methods
 
-These methods reduce the cost of evaluating dynamic-programming candidates through convex-hull, tree, Monge or related structure.
+`LyuLeeParallelSolver` exposes the parallel literature line as a separate public implementation.
 
-Representative strategies:
+## Network and combinatorial methods
 
-- `WagnerWhitinSolver`;
-- `WagelmansGeneralSolver`;
-- `FedergruenTzurSolver`;
-- `FedergruenTzurNoSpeculativeMotiveSolver`;
-- `FedergruenTzurNondecreasingSetupSolver`;
-- `AggarwalParkSolver`.
+`ZangwillNetworkSolver` uses a shortest-path interpretation. `JacobsKhumawalaBranchAndBoundSolver` represents the branch-and-bound literature line.
 
-These are especially relevant when ULS is used repeatedly as a subproblem.
+## Solver-backed exact strategies
 
-## Linear specialized methods
+Mathematical formulations and `(l,S)` cutting-plane solvers are exact too, but they are shown separately in the user documentation because they depend on an optimization engine.
 
-`ChowdhuryBakiAzabSolver` implements the published linear active-diagonal method under its supported stationary-cost assumptions.
-
-Other O(T) implementations exploit specific cost structure and should never be selected without checking applicability.
-
-## Network / shortest path
-
-`ZangwillNetworkSolver` represents zero-inventory boundaries as nodes of an acyclic network and solves a backward shortest-path recurrence.
-
-## Branch and bound
-
-`JacobsKhumawalaBranchAndBoundSolver` exposes the branch/subproblem viewpoint and dominance logic of the historical simplified exact procedure.
-
-## Parallel dynamic programming
-
-`LyuLeeParallelSolver` evaluates predecessor candidates in parallel using a modern shared-memory reconstruction of the published architecture.
-
-## Choosing among exact methods
-
-Use @ref algorithm_selection for recommendations and @ref complexity_applicability for the full matrix.
+For a method-by-method comparison, open @ref algorithm_catalog or use the card-based documentation portal.

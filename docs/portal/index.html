@@ -3,172 +3,151 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ULSAlgorithms Documentation</title>
-  <meta name="description" content="Documentation portal for high-performance exact and heuristic uncapacitated lot-sizing algorithms in C#/.NET.">
+  <title>ULSAlgorithms — Algorithms for Uncapacitated Lot Sizing</title>
+  <meta name="description" content="Browse exact algorithms, mathematical formulations, cutting-plane methods and heuristics for deterministic uncapacitated lot sizing in C#/.NET.">
   <meta name="theme-color" content="#071d43">
   <link rel="icon" href="favicon.ico">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="hero">
-    <nav class="topbar" aria-label="Primary">
+  <header class="site-header">
+    <nav class="topbar" aria-label="Primary navigation">
       <a class="brand" href="index.html">
         <img src="assets/algorithms-icon-64.png" alt="">
         <span>Lemoine-OR <strong>Algorithms</strong></span>
       </a>
       <div class="toplinks">
-        <a href="api/getting_started.html">Getting Started</a>
-        <a href="api/algorithm_catalog.html">Algorithms</a>
-        <a href="api/validation_benchmarks.html">Benchmarks</a>
-        <a href="api/index.html">API</a>
+        <a href="api/getting_started.html">Getting started</a>
+        <a href="#algorithms">Algorithms</a>
+        <a href="api/simple_api.html">Simple API</a>
+        <a href="api/index.html">Full API</a>
         <a href="https://github.com/Lemoine-OR/ULSAlgorithms">GitHub</a>
       </div>
     </nav>
 
-    <div class="hero-grid">
+    <div class="hero">
       <div class="hero-copy">
-        <div class="eyebrow">Lemoine-OR · C# / .NET · Operations Research</div>
-        <div class="version-badge">Version {{VERSION}} · commit {{COMMIT}}</div>
+        <div class="eyebrow">ULSAlgorithms · C# / .NET · Operations Research</div>
         <img class="hero-logo" src="assets/ulsalgorithms-logo-light.svg" alt="ULSAlgorithms">
-        <p class="hero-lead">
-          Exact and heuristic algorithms for deterministic uncapacitated lot sizing —
-          documented by scientific family, assumptions, complexity and provenance.
+        <h1>Find an algorithm. Understand it. Use it.</h1>
+        <p>
+          A simpler documentation experience for deterministic Uncapacitated Lot-Sizing:
+          one card per algorithm, one consistent page per method, and one common API pattern.
         </p>
         <div class="hero-actions">
-          <a class="button primary" href="api/getting_started.html">Get started <span>→</span></a>
-          <a class="button secondary" href="api/algorithm_catalog.html">Algorithm catalog</a>
-          <a class="button ghost" href="https://github.com/Lemoine-OR/ULSAlgorithms">View on GitHub</a>
+          <a class="button primary" href="#algorithms">Browse algorithms</a>
+          <a class="button secondary" href="api/getting_started.html">Start in 30 seconds</a>
         </div>
+        <div class="version-line">Version {{VERSION}} · commit {{COMMIT}}</div>
       </div>
-      <div class="hero-visual" aria-hidden="true">
-        <img src="assets/algorithm-network-hero.svg" alt="">
+      <div class="quickstart-card">
+        <div class="quickstart-title"><span>Minimal usage</span><code>IUlsSolver</code></div>
+        <pre><code>var problem = new UlsProblem(
+    demands,
+    setupCosts,
+    productionCosts,
+    holdingCosts);
+
+IUlsSolver solver =
+    new WagnerWhitinSolver();
+
+var result = solver.Solve(problem);</code></pre>
+        <a href="api/getting_started.html">Explain each line →</a>
       </div>
     </div>
   </header>
 
   <main>
-    <section class="metrics" aria-label="Project summary">
-      <div class="metric"><strong>{{EXACT_COUNT}}</strong><span>Exact algorithms</span></div>
-      <div class="metric"><strong>{{HEURISTIC_COUNT}}</strong><span>Heuristics</span></div>
-      <div class="metric"><strong>{{TOTAL_COUNT}}</strong><span>Public strategies</span></div>
-      <div class="metric"><strong>.NET 10</strong><span>Modern C# implementation</span></div>
-      <div class="metric"><strong>CI validated</strong><span>Tests, docs, releases</span></div>
+    <section class="metrics" aria-label="Library summary">
+      <div><strong>{{TOTAL_COUNT}}</strong><span>public strategies</span></div>
+      <div><strong>{{DIRECT_EXACT_COUNT}}</strong><span>direct exact</span></div>
+      <div><strong>{{OPTIMIZATION_COUNT}}</strong><span>formulations</span></div>
+      <div><strong>{{CUTTING_COUNT}}</strong><span>cutting-plane</span></div>
+      <div><strong>{{HEURISTIC_COUNT}}</strong><span>heuristics</span></div>
     </section>
 
-    <section class="section">
-      <div class="section-heading">
-        <div>
-          <div class="kicker">Documentation map</div>
-          <h2>Start with the problem, then choose the method</h2>
-        </div>
-        <p>
-          The documentation is organized for researchers and algorithm users, not as a flat dump of source-generated pages.
-        </p>
+    <section class="orientation">
+      <div class="section-title">
+        <span class="kicker">Choose by method family</span>
+        <h2>Four clear entry points</h2>
+        <p>No release packs, no duplicated catalog pages, no need to understand the source tree before choosing a method.</p>
       </div>
-      <div class="card-grid start-grid">
-        <a class="nav-card" href="api/getting_started.html">
-          <div class="nav-icon">01</div>
-          <div><span class="card-label">Start here</span><h3>Getting Started</h3><p>Create a problem, select an `IUlsSolver`, solve and interpret the result.</p></div>
-          <span class="arrow">→</span>
-        </a>
-        <a class="nav-card" href="api/problem_and_notation.html">
-          <div class="nav-icon">02</div>
-          <div><span class="card-label">Theory</span><h3>Problem &amp; Notation</h3><p>ULS model, cost convention, regeneration intervals and zero-inventory structure.</p></div>
-          <span class="arrow">→</span>
-        </a>
-        <a class="nav-card" href="api/algorithm_catalog.html">
-          <div class="nav-icon">03</div>
-          <div><span class="card-label">Methods</span><h3>Algorithm Catalog</h3><p>All public exact methods and heuristics with complexity and applicability.</p></div>
-          <span class="arrow">→</span>
-        </a>
-        <a class="nav-card" href="api/algorithm_selection.html">
-          <div class="nav-icon">04</div>
-          <div><span class="card-label">Decision support</span><h3>Algorithm Selection</h3><p>Choose by cost structure, horizon size, optimality requirement and memory trade-off.</p></div>
-          <span class="arrow">→</span>
-        </a>
+      <div class="family-grid">
+        <button class="family-card exact" data-jump-filter="exact">
+          <span class="family-number">01</span><strong>Exact algorithms</strong>
+          <small>Dynamic programming, geometric, network, branch-and-bound and parallel methods.</small>
+        </button>
+        <button class="family-card optimization" data-jump-filter="optimization">
+          <span class="family-number">02</span><strong>Mathematical optimization</strong>
+          <small>Portable formulations solved through automatic CPLEX → Gurobi → Xpress → CBC selection.</small>
+        </button>
+        <button class="family-card cutting" data-jump-filter="cutting">
+          <span class="family-number">03</span><strong>Cutting planes</strong>
+          <small>Exact (l,S) strengthening with generated/added-cut traceability.</small>
+        </button>
+        <button class="family-card heuristic" data-jump-filter="heuristic">
+          <span class="family-number">04</span><strong>Heuristics</strong>
+          <small>Fast baseline, average-cost, part-period and marginal-cost planning rules.</small>
+        </button>
       </div>
     </section>
 
-    <section class="section split">
-      <a class="family-panel exact-panel" href="api/exact_algorithms.html">
-        <div class="family-meta">Exact methods</div>
-        <h2>Dynamic programming, geometry, networks and parallelism</h2>
-        <p>From classical Wagner–Whitin to O(T) specializations, shortest paths and modern reconstructions.</p>
-        <div class="family-tags">
-          <span>Wagner–Whitin</span><span>Geometric DP</span><span>Planning horizon</span><span>Network</span><span>Branch &amp; bound</span><span>Parallel</span>
+    <section class="algorithm-browser" id="algorithms">
+      <div class="browser-head">
+        <div class="section-title compact">
+          <span class="kicker">All public methods</span>
+          <h2>Choose an algorithm</h2>
+          <p>Click a card for a dedicated page with description, specifications, operation, minimal code and API links.</p>
         </div>
-        <strong>Explore exact algorithms →</strong>
-      </a>
-      <a class="family-panel heuristic-panel" href="api/heuristics.html">
-        <div class="family-meta">Heuristics</div>
-        <h2>Fast classical rules with a common strategy contract</h2>
-        <p>Silver–Meal, LUC, PPB, Groff, IPPA, Wemmerlöv variants and practical baselines.</p>
-        <div class="family-tags">
-          <span>Average-cost</span><span>Part-period</span><span>Marginal-cost</span><span>LALB</span><span>Baseline</span>
-        </div>
-        <strong>Explore heuristics →</strong>
-      </a>
-    </section>
-
-    <section class="section">
-      <div class="section-heading algorithm-heading">
-        <div>
-          <div class="kicker">Algorithm index</div>
-          <h2>Browse the current public strategy set</h2>
-        </div>
-        <div class="catalog-controls">
+        <div class="browser-controls">
           <label class="searchbox">
-            <span>⌕</span>
-            <input id="algorithmSearch" type="search" placeholder="Search name, family, class or assumption…" autocomplete="off">
+            <span aria-hidden="true">⌕</span>
+            <input id="algorithmSearch" type="search" placeholder="Search algorithm, family, class or assumption…" autocomplete="off">
           </label>
-          <div class="filter-buttons" role="group" aria-label="Algorithm filter">
+          <div class="filters" role="group" aria-label="Algorithm family filter">
             <button class="filter active" data-filter="all">All</button>
             <button class="filter" data-filter="exact">Exact</button>
-            <button class="filter" data-filter="heuristic">Heuristic</button>
+            <button class="filter" data-filter="optimization">Optimization</button>
+            <button class="filter" data-filter="cutting">Cutting planes</button>
+            <button class="filter" data-filter="heuristic">Heuristics</button>
           </div>
+          <span id="resultCount" class="result-count">{{TOTAL_COUNT}} algorithms</span>
         </div>
       </div>
-      <div class="algorithm-table-wrap">
-        <table class="algorithm-table">
-          <thead>
-            <tr><th>Algorithm</th><th>Family</th><th>Time</th><th>Memory</th><th>Applicability</th><th></th></tr>
-          </thead>
-          <tbody id="algorithmRows">
-{{ALGORITHM_ROWS}}
-          </tbody>
-        </table>
-      </div>
-      <div class="table-footer">
-        <span id="resultCount">{{TOTAL_COUNT}} strategies</span>
-        <a href="api/complexity_applicability.html">Open the full complexity &amp; applicability guide →</a>
-      </div>
+
+      <section class="algorithm-section" data-section-group="exact">
+        <div class="algorithm-section-head"><div><span>Exact algorithms</span><h3>Direct methods</h3></div><p>Self-contained exact implementations: dynamic programming, networks and combinatorial approaches.</p></div>
+        <div class="algorithm-grid">{{EXACT_CARDS}}</div>
+      </section>
+
+      <section class="algorithm-section" data-section-group="optimization">
+        <div class="algorithm-section-head"><div><span>Mathematical optimization</span><h3>Solver-backed formulations</h3></div><p>Exact mathematical models with automatic optimization-engine discovery.</p></div>
+        <div class="algorithm-grid">{{OPTIMIZATION_CARDS}}</div>
+      </section>
+
+      <section class="algorithm-section" data-section-group="cutting">
+        <div class="algorithm-section-head"><div><span>Polyhedral methods</span><h3>Cutting planes</h3></div><p>Exact root strengthening using classical (l,S) inequalities.</p></div>
+        <div class="algorithm-grid">{{CUTTING_CARDS}}</div>
+      </section>
+
+      <section class="algorithm-section" data-section-group="heuristic">
+        <div class="algorithm-section-head"><div><span>Fast construction rules</span><h3>Heuristics</h3></div><p>Practical feasible plans with a common strategy contract and no false optimality claim.</p></div>
+        <div class="algorithm-grid">{{HEURISTIC_CARDS}}</div>
+      </section>
     </section>
 
-    <section class="section">
-      <div class="section-heading">
-        <div><div class="kicker">Engineering &amp; scientific quality</div><h2>Not only implementations — evidence</h2></div>
-        <p>The documentation separates algorithm theory, software engineering and reproducibility.</p>
-      </div>
-      <div class="card-grid quality-grid">
-        <a class="quality-card" href="api/validation_benchmarks.html"><div class="quality-icon">✓</div><h3>Validation &amp; Benchmarks</h3><p>Independent exact oracles, randomized campaigns, feasibility reconstruction and BenchmarkDotNet.</p></a>
-        <a class="quality-card" href="api/scientific_references.html"><div class="quality-icon">∑</div><h3>Scientific References</h3><p>Publication identity, DOI links and explicit reconstruction notes for historically sourced methods.</p></a>
-        <a class="quality-card" href="api/api_reference_guide.html"><div class="quality-icon">{ }</div><h3>API Reference</h3><p>`IUlsSolver`, problem model, result model, namespaces, classes and source browsing.</p></a>
-        <a class="quality-card" href="api/releases_reproducibility.html"><div class="quality-icon">#</div><h3>Reproducibility</h3><p>Version, commit, validated release bundle, checksums and frozen documentation archives.</p></a>
-      </div>
+    <section class="help-grid">
+      <a href="api/getting_started.html"><span>Start</span><strong>Getting Started</strong><p>Input arrays → algorithm → solution.</p></a>
+      <a href="api/simple_api.html"><span>Use</span><strong>Simple API</strong><p>The four types most users need.</p></a>
+      <a href="api/complexity_applicability.html"><span>Choose</span><strong>Complexity & assumptions</strong><p>Know when a restricted method applies.</p></a>
+      <a href="api/validation_benchmarks.html"><span>Trust</span><strong>Validation & benchmarks</strong><p>Tests, exact oracles and performance evidence.</p></a>
     </section>
   </main>
 
   <footer>
-    <div class="footer-brand">
-      <img src="assets/algorithms-icon-32.png" alt="">
-      <div><strong>Lemoine-OR Algorithms</strong><span>Clean. Scientific. Open.</span></div>
-    </div>
-    <div class="footer-meta">ULSAlgorithms {{VERSION}} · commit {{COMMIT}} · David Lemoine</div>
-    <div class="footer-links">
-      <a href="api/index.html">API</a>
-      <a href="https://github.com/Lemoine-OR/ULSAlgorithms/releases/latest">Release</a>
-      <a href="https://github.com/Lemoine-OR/ULSAlgorithms/actions">CI</a>
-    </div>
+    <div class="footer-brand"><img src="assets/algorithms-icon-32.png" alt=""><div><strong>Lemoine-OR Algorithms</strong><span>Clean. Scientific. Open.</span></div></div>
+    <div>ULSAlgorithms {{VERSION}} · {{COMMIT}}</div>
+    <div class="footer-links"><a href="api/index.html">Full API</a><a href="https://github.com/Lemoine-OR/ULSAlgorithms/releases/latest">Release</a><a href="https://github.com/Lemoine-OR/ULSAlgorithms">GitHub</a></div>
   </footer>
 
   <script src="app.js"></script>

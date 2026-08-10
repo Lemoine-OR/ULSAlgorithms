@@ -1,49 +1,33 @@
-# ULSAlgorithms API Reference
+# ULSAlgorithms
 
-**Exact and heuristic algorithms for deterministic uncapacitated lot sizing.**
+**Uncapacitated Lot-Sizing algorithms in C# / .NET.**
 
-This API site is the technical reference generated directly from the C# source and curated scientific documentation.
+The generated API reference is the advanced layer of the documentation. For normal use, start from the documentation portal and the short guides below.
 
-> [Back to the ULSAlgorithms documentation portal](../index.html)
+## Use the library
 
-## Start here
+- @subpage getting_started — create a problem, choose an algorithm, solve it.
+- @subpage simple_api — the small common API used by every algorithm.
+- @subpage method_families — understand the four method families currently available.
 
-- @subpage overview
-- @subpage getting_started
-- @subpage problem_and_notation
-- @subpage algorithm_catalog
-- @subpage algorithm_selection
+## Browse methods
 
-## Algorithm families
+- @subpage exact_algorithms — direct exact algorithms.
+- @subpage heuristics — fast heuristic strategies.
+- @subpage mathematical_formulations — solver-backed formulations.
+- @subpage ls_cutting_planes — exact cutting-plane methods.
+- @subpage algorithm_catalog — complete generated inventory.
 
-- @subpage exact_algorithms
-- @subpage heuristics
+## Go deeper only when needed
+
 - @subpage complexity_applicability
-- @subpage literature_heuristics_v022
-
-## Solver-backed methods
-
-- @subpage optimization_solver_integration
-- @subpage solver_adapters
-- @subpage mathematical_formulations
-- @subpage solver_execution
-- @subpage formulation_solvers
-- @subpage cut_generation_traceability
-- @subpage ls_cutting_planes
-- @subpage cutting_plane_engineering
-
-## Engineering and science
-
 - @subpage validation_benchmarks
-- @subpage api_reference_guide
 - @subpage scientific_references
 - @subpage releases_reproducibility
 - @subpage contributing_algorithms
 
-## Source
+## Full generated API
 
-The source code is maintained in the
-[`Lemoine-OR/ULSAlgorithms`](https://github.com/Lemoine-OR/ULSAlgorithms)
-GitHub repository.
+Use the **Classes**, **Namespaces** and **Files** tabs when you need implementation-level details.
 
-The generated API tree on the left provides namespaces, classes, members, files and source references.
+Source repository: `Lemoine-OR/ULSAlgorithms`.

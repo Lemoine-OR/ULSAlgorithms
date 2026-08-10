@@ -1,58 +1,57 @@
-\page api_reference_guide API Reference Guide
+\page simple_api Simple API
 
-# API Reference Guide
+# Simple API
 
-## Common strategy contract
+Most users need only four public types.
 
-All public solvers implement `IUlsSolver`.
+## `UlsProblem`
+
+Input data for one deterministic ULS instance.
 
 ```csharp
-public interface IUlsSolver
-{
-    string Name { get; }
-    UlsSolverKind Kind { get; }
-
-    UlsSolveResult Solve(
-        UlsProblem problem,
-        CancellationToken cancellationToken = default);
-}
+var problem = new UlsProblem(
+    demands,
+    setupCosts,
+    unitProductionCosts,
+    holdingCosts);
 ```
 
-This is the primary extension point for algorithm selection.
+All vectors have length `Horizon`.
 
-## Input model
+## `IUlsSolver`
 
-`UlsProblem` validates and stores:
+The common strategy interface.
 
-- `Demands`;
-- `SetupCosts`;
-- `UnitProductionCosts`;
-- `HoldingCosts`;
-- `Horizon`;
-- `TotalDemand`.
+```csharp
+IUlsSolver solver = new WagnerWhitinSolver();
+var result = solver.Solve(problem);
+```
 
-The constructor copies the input vectors once. Solvers then access contiguous read-only spans.
+Every algorithm exposes:
 
-## Result model
+| Member | Meaning |
+|---|---|
+| `Name` | readable algorithm name |
+| `Kind` | exact or heuristic |
+| `Solve(problem, cancellationToken)` | solve the instance |
 
-`UlsSolveResult` separates the solve status from the returned solution.
+## `UlsSolveResult`
 
-Use the status to distinguish:
+The common result wrapper.
 
-- exact optimal solutions;
-- heuristic feasible solutions;
-- other explicit result states defined by the API.
+| Member | Meaning |
+|---|---|
+| `Status` | optimal, feasible, infeasible, failed, … |
+| `ObjectiveValue` | total cost when a solution exists |
+| `Solution` | detailed production plan |
+| `Message` | optional diagnostic information |
 
-## Navigating generated API docs
+## `UlsSolution`
 
-Use the left tree for namespaces and classes, or the search box for a specific solver class.
+The detailed plan contains production quantities, ending inventories, setup decisions and cost components.
 
-Useful namespaces include:
+## Advanced APIs
 
-- `ULSAlgorithms.Abstractions`;
-- `ULSAlgorithms.Models`;
-- `ULSAlgorithms.Results`;
-- `ULSAlgorithms.Exact`;
-- `ULSAlgorithms.Heuristics`.
+You only need the advanced layer when using solver selection, mathematical formulations, cutting-plane reports or custom execution backends. Those types remain fully documented in the generated class/namespace reference but are intentionally kept out of the basic workflow.
 
-Return to @ref overview at any time for conceptual navigation.
+This split is deliberate: **simple API first, implementation API second**.

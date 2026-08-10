@@ -2,30 +2,39 @@
 
 # Getting Started
 
-## 1. Create a ULS problem
+ULSAlgorithms is designed around one simple workflow:
 
-`UlsProblem` stores four vectors of equal length:
+```text
+1. Create a UlsProblem
+2. Choose an IUlsSolver
+3. Call Solve
+4. Read UlsSolveResult
+```
 
-- demand `d[t]`;
-- setup cost `f[t]`;
-- unit production cost `p[t]`;
-- end-of-period unit holding cost `h[t]`.
+## 1. Create the problem
 
 ```csharp
 using ULSAlgorithms.Models;
 
 var problem = new UlsProblem(
     demands:             [20.0, 30.0, 25.0, 40.0],
-    setupCosts:          [100.0, 100.0, 100.0, 100.0],
-    unitProductionCosts: [  0.0,   0.0,   0.0,   0.0],
-    holdingCosts:        [  2.0,   2.0,   2.0,   0.0]);
+    setupCosts:          [200.0, 200.0, 200.0, 200.0],
+    unitProductionCosts: [0.0, 0.0, 0.0, 0.0],
+    holdingCosts:        [4.0, 4.0, 4.0, 0.0]);
 ```
 
-Periods are zero-based in the API.
+All four arrays have one value per planning period:
 
-## 2. Select an algorithm
+| Parameter | Meaning |
+|---|---|
+| `demands` | demand to satisfy in each period |
+| `setupCosts` | fixed cost paid when production starts in a period |
+| `unitProductionCosts` | variable production cost per unit |
+| `holdingCosts` | cost of carrying one unit of end-of-period inventory |
 
-Every public solver implements `IUlsSolver`.
+Periods are zero-based. Backlogging is not allowed and initial inventory is zero.
+
+## 2. Choose an algorithm
 
 ```csharp
 using ULSAlgorithms.Abstractions;
@@ -34,39 +43,33 @@ using ULSAlgorithms.Exact.WagnerWhitin;
 IUlsSolver solver = new WagnerWhitinSolver();
 ```
 
-Use @ref algorithm_selection and @ref complexity_applicability before selecting a restricted method.
+Every public algorithm implements the same `IUlsSolver` contract. Changing method therefore changes only the instantiated class.
 
 ## 3. Solve
 
 ```csharp
 var result = solver.Solve(problem);
-
-Console.WriteLine(result.Status);
-Console.WriteLine(result.ObjectiveValue);
 ```
 
-Exact methods return `Optimal` after exact completion. Heuristics return `Feasible` and never claim optimality.
+For long-running or solver-backed methods, an optional cancellation token can be passed.
 
-## 4. Exchange strategies without changing caller code
+## 4. Read the result
 
 ```csharp
-IUlsSolver[] solvers =
-[
-    new WagnerWhitinSolver(),
-    new WagelmansGeneralSolver(),
-    new SilverMealSolver()
-];
+Console.WriteLine(result.Status);
+Console.WriteLine(result.ObjectiveValue);
 
-foreach (var candidate in solvers)
+if (result.Solution is not null)
 {
-    var candidateResult = candidate.Solve(problem);
-    Console.WriteLine(
-        $"{candidate.Name}: {candidateResult.ObjectiveValue}");
+    Console.WriteLine(string.Join(", ", result.Solution.ProductionQuantities.ToArray()));
 }
 ```
 
-## Next steps
+Exact methods may return `Optimal`. Heuristics return `Feasible` because they do not claim an optimality proof.
 
-- @ref problem_and_notation
-- @ref algorithm_catalog
-- @ref validation_benchmarks
+## What should I read next?
+
+- Need an algorithm: use the card-based documentation home page.
+- Need to understand inputs/results: see @ref simple_api.
+- Need complexity or assumptions: see @ref complexity_applicability.
+- Need every class/member: use the generated API tabs.

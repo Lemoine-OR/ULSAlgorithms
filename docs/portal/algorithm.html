@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{NAME}} &mdash; ULSAlgorithms</title>
+  <meta name="description" content="{{NAME}} documentation: description, specifications, operation, minimal C# usage and API reference.">
+  <link rel="icon" href="../favicon.ico">
+  <link rel="stylesheet" href="../styles.css">
+  {{MATHJAX_HEAD}}
+</head>
+<body class="algorithm-page">
+  <header class="algorithm-topbar">
+    <a class="brand" href="../index.html"><img src="../assets/algorithms-icon-64.png" alt=""><span>Lemoine-OR <strong>Algorithms</strong></span></a>
+    <nav><a href="../index.html#algorithms">All algorithms</a><a href="../api/getting_started.html">Getting started</a><a href="../api/simple_api.html">Simple API</a><a href="{{API_HREF}}">Full API</a></nav>
+  </header>
+
+  <main class="algorithm-layout">
+    <aside class="algorithm-summary">
+      <a class="back-link" href="../index.html#algorithms">&larr; All algorithms</a>
+      <div class="algorithm-kind {{GROUP}}">{{GROUP_LABEL}}</div>
+      <h1>{{NAME}}</h1>
+      <code class="class-name">{{CLASS}}</code>
+      <dl class="spec-list">
+        <div><dt>Family</dt><dd>{{FAMILY}}</dd></div>
+        <div><dt>Time</dt><dd>{{TIME}}</dd></div>
+        <div><dt>Memory</dt><dd>{{SPACE}}</dd></div>
+        <div><dt>Use when</dt><dd>{{APPLICABILITY}}</dd></div>
+      </dl>
+      <div class="summary-actions">
+        <a class="button primary" href="{{API_HREF}}">API reference</a>
+        <a class="button outline" href="{{SOURCE_URL}}">Source code &#8599;</a>
+      </div>
+    </aside>
+
+    <article class="algorithm-content">
+      <section>
+        <span class="kicker">Description</span>
+        <h2>What this method is</h2>
+        <p>{{DESCRIPTION}}</p>
+      </section>
+
+      <section>
+        <span class="kicker">How it works</span>
+        <h2>Core idea</h2>
+        <p>{{HOW_IT_WORKS}}</p>
+        <div class="implementation-note"><strong>Implementation in ULSAlgorithms</strong><span>{{IMPLEMENTATION}}</span></div>
+      </section>
+
+      {{MATHEMATICAL_MODEL}}
+
+      <section>
+        <span class="kicker">Use it</span>
+        <div class="code-heading"><h2>Minimal C# example</h2><button class="copy-code" type="button" data-copy-target="usageCode">Copy</button></div>
+        <pre><code id="usageCode">{{USAGE_CODE}}</code></pre>
+        <p class="small-note">The input example intentionally uses stationary, positive-demand data so it is compatible with restricted methods too. Always check the applicability box for your own instance.</p>
+      </section>
+
+      <section>
+        <span class="kicker">Scientific source</span>
+        <h2>Reference & provenance</h2>
+        <p>{{PUBLICATION_HTML}}</p>
+      </section>
+
+      <section class="next-links">
+        <a href="{{API_HREF}}"><span>Full details</span><strong>Open API reference &rarr;</strong></a>
+        <a href="{{SOURCE_URL}}"><span>Implementation</span><strong>Open source file &#8599;</strong></a>
+        <a href="../api/complexity_applicability.html"><span>Before choosing</span><strong>Complexity & applicability &rarr;</strong></a>
+      </section>
+    </article>
+  </main>
+
+  <footer><div class="footer-brand"><img src="../assets/algorithms-icon-32.png" alt=""><div><strong>Lemoine-OR Algorithms</strong><span>Clean. Scientific. Open.</span></div></div><div>ULSAlgorithms {{VERSION}} &middot; {{COMMIT}}</div></footer>
+  <script src="../app.js"></script>
+</body>
+</html>

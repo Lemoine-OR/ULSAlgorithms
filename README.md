@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>High-performance exact and heuristic algorithms for the Uncapacitated Lot-Sizing problem (ULS), implemented in C# / .NET.</strong>
+  <strong>Fast, scientific and reusable C# algorithms for deterministic Uncapacitated Lot-Sizing.</strong>
 </p>
 
 <p align="center">
@@ -14,59 +14,122 @@
 </p>
 
 <p align="center">
-  <a href="https://lemoine-or.github.io/ULSAlgorithms/"><strong>Documentation portal</strong></a>
+  <a href="https://lemoine-or.github.io/ULSAlgorithms/"><strong>Documentation</strong></a>
+  ·
+  <a href="https://lemoine-or.github.io/ULSAlgorithms/#algorithms"><strong>Algorithms</strong></a>
+  ·
+  <a href="https://lemoine-or.github.io/ULSAlgorithms/api/getting_started.html"><strong>Getting started</strong></a>
   ·
   <a href="https://github.com/Lemoine-OR/ULSAlgorithms/releases/latest"><strong>Latest release</strong></a>
-  ·
-  <a href="https://github.com/Lemoine-OR/ULSAlgorithms/actions"><strong>CI / CD</strong></a>
 </p>
 
 ---
 
-## Overview
+## Start in 30 seconds
 
-**ULSAlgorithms** is a research-oriented C# library for deterministic
-**Uncapacitated Lot-Sizing (ULS)**.
+All public methods use the same core strategy contract: create a `UlsProblem`, choose an `IUlsSolver`, call `Solve`.
 
-The library now contains:
+```csharp
+using ULSAlgorithms.Abstractions;
+using ULSAlgorithms.Exact.WagnerWhitin;
+using ULSAlgorithms.Models;
 
-- **22 exact `IUlsSolver` strategies**;
-- **15 heuristic `IUlsSolver` strategies**;
-- **37 public solving strategies**;
-- four mathematical-programming formulations;
-- general and Wagner-Whitin `(l,S)` cutting-plane solvers;
-- automatic **CPLEX → Gurobi → Xpress → CBC** discovery;
-- numerical normalization and independent solution checking;
-- cutting-plane convergence engineering and BenchmarkDotNet benchmarks.
+var problem = new UlsProblem(
+    demands:             [20.0, 30.0, 25.0, 40.0],
+    setupCosts:          [200.0, 200.0, 200.0, 200.0],
+    unitProductionCosts: [0.0, 0.0, 0.0, 0.0],
+    holdingCosts:        [4.0, 4.0, 4.0, 0.0]);
 
-Developed and maintained by **David Lemoine — Lemoine-OR**.
+IUlsSolver solver = new WagnerWhitinSolver();
+var result = solver.Solve(problem);
 
-## v0.22.0 literature heuristics
-
-Four additional public methods are available:
-
-```text
-PartPeriodSimplifiedSolver
-SegerstedtReformulatedSilverMealSolver
-ChiuModifiedLeastUnitCostSolver
-ChiuTingModifiedPartPeriodBalancingSolver
+Console.WriteLine(result.ObjectiveValue);
 ```
 
-The release also separates **Part-Period Simplified / no-overshoot LTC** from
-nearest-EPP **Part-Period Balancing** instead of treating those rules as one
-algorithm.
+> **New to the library?** Open the [Getting Started guide](https://lemoine-or.github.io/ULSAlgorithms/api/getting_started.html).  
+> **Looking for a method?** Every algorithm below opens a dedicated, uniform documentation page.
 
-## Scientific sources
+## Choose a family
 
-- DeMatteis (1968), *An Economic Lot-Sizing Technique I: The Part-Period Algorithm*.
-- Baciarello et al. (2013), DOI `10.5772/56004`.
-- Segerstedt, Abdul-Jalbar & Samuelsson (2023),
-  DOI `10.3390/axioms12070661`.
-- Chiu (2004), DOI `10.1080/09720510.2004.10701115`.
-- Chiu, Ting & Chiu (2005), *A modified version of the part period lot-sizing heuristic*.
+<table>
+<tr>
+<td width="25%"><strong>Exact algorithms</strong><br><sub>Direct dynamic programming, network and combinatorial methods.</sub></td>
+<td width="25%"><strong>Mathematical optimization</strong><br><sub>Solver-backed formulations with automatic CPLEX → Gurobi → Xpress → CBC selection.</sub></td>
+<td width="25%"><strong>Cutting planes</strong><br><sub>Exact (l,S) cut-and-solve methods with full cut traceability.</sub></td>
+<td width="25%"><strong>Heuristics</strong><br><sub>Fast construction rules returning feasible plans without an optimality claim.</sub></td>
+</tr>
+</table>
 
-Methods whose detailed published rules are not yet available are not
-mislabelled or reconstructed from abstracts.
+## All algorithms
+
+Click any panel to open its dedicated page: description, technical specifications, how it works, minimal usage and API/source links.
+
+### Exact algorithms — dynamic programming & specialized methods
+
+<table>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/wagnerwhitinclassicalsolver.html"><strong>Wagner–Whitin classical</strong></a><br><sub>Exact</sub><br><code>WagnerWhitinClassicalSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/wagnerwhitinevanssolver.html"><strong>Wagner–Whitin / Evans</strong></a><br><sub>Exact</sub><br><code>WagnerWhitinEvansSolver</code></td></tr>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/wagnerwhitinsolver.html"><strong>Wagner–Whitin linear</strong></a><br><sub>Exact</sub><br><code>WagnerWhitinSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/wagelmansgeneralsolver.html"><strong>Wagelmans general</strong></a><br><sub>Exact</sub><br><code>WagelmansGeneralSolver</code></td></tr>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/federgruentzursolver.html"><strong>Federgruen–Tzur general</strong></a><br><sub>Exact</sub><br><code>FedergruenTzurSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/federgruentzurnospeculativemotivesolver.html"><strong>Federgruen–Tzur linear (NSM)</strong></a><br><sub>Exact</sub><br><code>FedergruenTzurNoSpeculativeMotiveSolver</code></td></tr>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/federgruentzurnondecreasingsetupsolver.html"><strong>Federgruen–Tzur linear (setup)</strong></a><br><sub>Exact</sub><br><code>FedergruenTzurNondecreasingSetupSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/aggarwalparksolver.html"><strong>Aggarwal–Park</strong></a><br><sub>Exact</sub><br><code>AggarwalParkSolver</code></td></tr>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/bahltajplanninghorizonsolver.html"><strong>Bahl–Taj planning horizon</strong></a><br><sub>Exact</sub><br><code>BahlTajPlanningHorizonSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/headyzhueconomicpartperiodsolver.html"><strong>Heady–Zhu</strong></a><br><sub>Exact</sub><br><code>HeadyZhuEconomicPartPeriodSolver</code></td></tr>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/chowdhurybakiazabsolver.html"><strong>Chowdhury–Baki–Azab</strong></a><br><sub>Exact</sub><br><code>ChowdhuryBakiAzabSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/sadjadiaryanezhadsadeghisolver.html"><strong>Sadjadi–Aryanezhad–Sadeghi</strong></a><br><sub>Exact</sub><br><code>SadjadiAryanezhadSadeghiSolver</code></td></tr>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/lyuleeparallelsolver.html"><strong>Lyu–Lee parallel</strong></a><br><sub>Exact</sub><br><code>LyuLeeParallelSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/saydammcknewfastwagnerwhitinsolver.html"><strong>Saydam–McKnew</strong></a><br><sub>Exact</sub><br><code>SaydamMcKnewFastWagnerWhitinSolver</code></td></tr>
+</table>
+
+### Exact algorithms — network & combinatorial
+
+<table>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/jacobskhumawalabranchandboundsolver.html"><strong>Jacobs–Khumawala</strong></a><br><sub>Exact</sub><br><code>JacobsKhumawalaBranchAndBoundSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/zangwillnetworksolver.html"><strong>Zangwill network</strong></a><br><sub>Exact</sub><br><code>ZangwillNetworkSolver</code></td></tr>
+</table>
+
+### Mathematical optimization
+
+<table>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/aggregateinventoryformulationsolver.html"><strong>Aggregate inventory formulation</strong></a><br><sub>Optimization</sub><br><code>AggregateInventoryFormulationSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/facilitylocationformulationsolver.html"><strong>Facility-location formulation</strong></a><br><sub>Optimization</sub><br><code>FacilityLocationFormulationSolver</code></td></tr>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/shortestpathformulationsolver.html"><strong>Shortest-path formulation</strong></a><br><sub>Optimization</sub><br><code>ShortestPathFormulationSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/inventoryeliminatedformulationsolver.html"><strong>Inventory-eliminated formulation</strong></a><br><sub>Optimization</sub><br><code>InventoryEliminatedFormulationSolver</code></td></tr>
+</table>
+
+### Cutting planes
+
+<table>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/generallscuttingplanesolver.html"><strong>General (l,S) cutting-plane</strong></a><br><sub>Cutting plane</sub><br><code>GeneralLsCuttingPlaneSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/wagnerwhitinlscuttingplanesolver.html"><strong>Wagner–Whitin (l,S) cutting-plane</strong></a><br><sub>Cutting plane</sub><br><code>WagnerWhitinLsCuttingPlaneSolver</code></td></tr>
+</table>
+
+### Heuristics — baseline & average-cost
+
+<table>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/lotforlotsolver.html"><strong>Lot-for-Lot</strong></a><br><sub>Heuristic</sub><br><code>LotForLotSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/periodicorderquantitysolver.html"><strong>Periodic Order Quantity</strong></a><br><sub>Heuristic</sub><br><code>PeriodicOrderQuantitySolver</code></td></tr>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/silvermealsolver.html"><strong>Silver–Meal</strong></a><br><sub>Heuristic</sub><br><code>SilverMealSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/segerstedtreformulatedsilvermealsolver.html"><strong>Reformulated Silver–Meal</strong></a><br><sub>Heuristic</sub><br><code>SegerstedtReformulatedSilverMealSolver</code></td></tr>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/leastunitcostsolver.html"><strong>Least Unit Cost</strong></a><br><sub>Heuristic</sub><br><code>LeastUnitCostSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/chiumodifiedleastunitcostsolver.html"><strong>Chiu modified Least Unit Cost</strong></a><br><sub>Heuristic</sub><br><code>ChiuModifiedLeastUnitCostSolver</code></td></tr>
+</table>
+
+### Heuristics — part-period
+
+<table>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/partperiodsimplifiedsolver.html"><strong>Part-Period Simplified</strong></a><br><sub>Heuristic</sub><br><code>PartPeriodSimplifiedSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/partperiodbalancingsolver.html"><strong>Part-Period Balancing</strong></a><br><sub>Heuristic</sub><br><code>PartPeriodBalancingSolver</code></td></tr>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/chiutingmodifiedpartperiodbalancingsolver.html"><strong>Chiu–Ting modified PPB</strong></a><br><sub>Heuristic</sub><br><code>ChiuTingModifiedPartPeriodBalancingSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/pattersonlaforgeincrementalpartperiodsolver.html"><strong>Patterson–LaForge incremental part-period</strong></a><br><sub>Heuristic</sub><br><code>PattersonLaForgeIncrementalPartPeriodSolver</code></td></tr>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/wemmerlovmodifiedpartperiodbalancingsolver.html"><strong>Wemmerlöv modified PPB</strong></a><br><sub>Heuristic</sub><br><code>WemmerlovModifiedPartPeriodBalancingSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/wemmerlovppblookaheadlookbacksolver.html"><strong>Wemmerlöv PPB Look-Ahead / Look-Back</strong></a><br><sub>Heuristic</sub><br><code>WemmerlovPpbLookAheadLookBackSolver</code></td></tr>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/wemmerlovmodifiedppblookaheadlookbacksolver.html"><strong>Wemmerlöv modified PPB Look-Ahead / Look-Back</strong></a><br><sub>Heuristic</sub><br><code>WemmerlovModifiedPpbLookAheadLookBackSolver</code></td><td width="50%">&nbsp;</td></tr>
+</table>
+
+### Heuristics — marginal-cost
+
+<table>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/groffsolver.html"><strong>Groff</strong></a><br><sub>Heuristic</sub><br><code>GroffSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/freelandcolleysolver.html"><strong>Freeland–Colley</strong></a><br><sub>Heuristic</sub><br><code>FreelandColleySolver</code></td></tr>
+</table>
+
+## Documentation structure
+
+The user-facing documentation is intentionally simple:
+
+- **Home:** browse all algorithms as cards and filter by method family.
+- **Algorithm page:** one identical structure for every method.
+- **Getting Started:** the shortest path from arrays to a solution.
+- **Simple API:** only the common objects needed by most users.
+- **Advanced API:** generated Doxygen reference for implementation details.
+- **Validation & benchmarks:** scientific and engineering evidence.
+
+Release-oriented “Pack I / Pack II” pages are no longer part of the user navigation. Release provenance remains available through GitHub releases and internal reproducibility notes.
 
 ---
 
