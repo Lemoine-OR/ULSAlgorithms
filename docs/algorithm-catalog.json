@@ -447,6 +447,54 @@
       "publication": "Chiu, Ting & Chiu (2005)",
       "doi": "",
       "implementation": "Nearest-EPP PPB plus cost-beneficial final-lot merge"
+    },
+    {
+      "name": "Ho-Chang-Solis net Least Period Cost",
+      "class": "HoChangSolisNetLeastPeriodCostSolver",
+      "family": "Average-cost / net period",
+      "time": "O(T)",
+      "space": "O(T)",
+      "applicability": "Stationary setup, production and relevant holding costs",
+      "sourcePath": "src/ULSAlgorithms/Heuristics/HoChangSolisNetLeastPeriodCostSolver.cs",
+      "publication": "Ho, Chang & Solis (2006)",
+      "doi": "10.1057/palgrave.jors.2602076",
+      "implementation": "Incremental O(T) evaluation of the published nAPC stopping rule; zero-demand periods are excluded from the average denominator"
+    },
+    {
+      "name": "Ho-Chang-Solis improved nLPC(i)",
+      "class": "HoChangSolisImprovedNetLeastPeriodCostSolver",
+      "family": "Average-cost / net period",
+      "time": "O(T)",
+      "space": "O(T)",
+      "applicability": "Stationary setup, production and relevant holding costs",
+      "sourcePath": "src/ULSAlgorithms/Heuristics/HoChangSolisImprovedNetLeastPeriodCostSolver.cs",
+      "publication": "Ho, Chang & Solis (2006)",
+      "doi": "10.1057/palgrave.jors.2602076",
+      "implementation": "Incremental nAPC rule with the published improved tie-breaking stop condition"
+    },
+    {
+      "name": "McLaren Order Moment",
+      "class": "McLarenOrderMomentSolver",
+      "family": "Part-period / EOQ hybrid",
+      "time": "O(T)",
+      "space": "O(T)",
+      "applicability": "Stationary setup, production and relevant holding costs",
+      "sourcePath": "src/ULSAlgorithms/Heuristics/McLarenOrderMomentSolver.cs",
+      "publication": "McLaren (1977); Baciarello et al. (2013)",
+      "doi": "10.5772/56004",
+      "implementation": "EOQ-derived Order Moment Target with part-period accumulation and a final marginal holding/setup test"
+    },
+    {
+      "name": "Karni Maximum Part-Period Gain",
+      "class": "KarniMaximumPartPeriodGainSolver",
+      "family": "Global part-period merge",
+      "time": "O(T log T)",
+      "space": "O(T)",
+      "applicability": "Stationary setup, production and relevant holding costs",
+      "sourcePath": "src/ULSAlgorithms/Heuristics/KarniMaximumPartPeriodGainSolver.cs",
+      "publication": "Karni (1981); Baciarello et al. (2013)",
+      "doi": "10.5772/56004",
+      "implementation": "Priority-queue acceleration of the published non-forward global smallest-part-period merge rule"
     }
   ]
 }

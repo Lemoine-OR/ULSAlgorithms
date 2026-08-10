@@ -101,6 +101,7 @@ Click any panel to open its dedicated page: description, technical specification
 <tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/lotforlotsolver.html"><strong>Lot-for-Lot</strong></a><br><sub>Heuristic</sub><br><code>LotForLotSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/periodicorderquantitysolver.html"><strong>Periodic Order Quantity</strong></a><br><sub>Heuristic</sub><br><code>PeriodicOrderQuantitySolver</code></td></tr>
 <tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/silvermealsolver.html"><strong>Silver–Meal</strong></a><br><sub>Heuristic</sub><br><code>SilverMealSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/segerstedtreformulatedsilvermealsolver.html"><strong>Reformulated Silver–Meal</strong></a><br><sub>Heuristic</sub><br><code>SegerstedtReformulatedSilverMealSolver</code></td></tr>
 <tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/leastunitcostsolver.html"><strong>Least Unit Cost</strong></a><br><sub>Heuristic</sub><br><code>LeastUnitCostSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/chiumodifiedleastunitcostsolver.html"><strong>Chiu modified Least Unit Cost</strong></a><br><sub>Heuristic</sub><br><code>ChiuModifiedLeastUnitCostSolver</code></td></tr>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/hochangsolisnetleastperiodcostsolver.html"><strong>Ho–Chang–Solis nLPC</strong></a><br><sub>Heuristic</sub><br><code>HoChangSolisNetLeastPeriodCostSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/hochangsolisimprovednetleastperiodcostsolver.html"><strong>Ho–Chang–Solis nLPC(i)</strong></a><br><sub>Heuristic</sub><br><code>HoChangSolisImprovedNetLeastPeriodCostSolver</code></td></tr>
 </table>
 
 ### Heuristics — part-period
@@ -109,7 +110,7 @@ Click any panel to open its dedicated page: description, technical specification
 <tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/partperiodsimplifiedsolver.html"><strong>Part-Period Simplified</strong></a><br><sub>Heuristic</sub><br><code>PartPeriodSimplifiedSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/partperiodbalancingsolver.html"><strong>Part-Period Balancing</strong></a><br><sub>Heuristic</sub><br><code>PartPeriodBalancingSolver</code></td></tr>
 <tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/chiutingmodifiedpartperiodbalancingsolver.html"><strong>Chiu–Ting modified PPB</strong></a><br><sub>Heuristic</sub><br><code>ChiuTingModifiedPartPeriodBalancingSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/pattersonlaforgeincrementalpartperiodsolver.html"><strong>Patterson–LaForge incremental part-period</strong></a><br><sub>Heuristic</sub><br><code>PattersonLaForgeIncrementalPartPeriodSolver</code></td></tr>
 <tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/wemmerlovmodifiedpartperiodbalancingsolver.html"><strong>Wemmerlöv modified PPB</strong></a><br><sub>Heuristic</sub><br><code>WemmerlovModifiedPartPeriodBalancingSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/wemmerlovppblookaheadlookbacksolver.html"><strong>Wemmerlöv PPB Look-Ahead / Look-Back</strong></a><br><sub>Heuristic</sub><br><code>WemmerlovPpbLookAheadLookBackSolver</code></td></tr>
-<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/wemmerlovmodifiedppblookaheadlookbacksolver.html"><strong>Wemmerlöv modified PPB Look-Ahead / Look-Back</strong></a><br><sub>Heuristic</sub><br><code>WemmerlovModifiedPpbLookAheadLookBackSolver</code></td><td width="50%">&nbsp;</td></tr>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/wemmerlovmodifiedppblookaheadlookbacksolver.html"><strong>Wemmerlöv modified PPB Look-Ahead / Look-Back</strong></a><br><sub>Heuristic</sub><br><code>WemmerlovModifiedPpbLookAheadLookBackSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/mclarenordermomentsolver.html"><strong>McLaren Order Moment</strong></a><br><sub>Heuristic</sub><br><code>McLarenOrderMomentSolver</code></td></tr>
 </table>
 
 ### Heuristics — marginal-cost
@@ -117,6 +118,16 @@ Click any panel to open its dedicated page: description, technical specification
 <table>
 <tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/groffsolver.html"><strong>Groff</strong></a><br><sub>Heuristic</sub><br><code>GroffSolver</code></td><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/freelandcolleysolver.html"><strong>Freeland–Colley</strong></a><br><sub>Heuristic</sub><br><code>FreelandColleySolver</code></td></tr>
 </table>
+
+### Heuristics — global merge
+
+<table>
+<tr><td width="50%"><a href="https://lemoine-or.github.io/ULSAlgorithms/algorithms/karnimaximumpartperiodgainsolver.html"><strong>Karni Maximum Part-Period Gain</strong></a><br><sub>Heuristic</sub><br><code>KarniMaximumPartPeriodGainSolver</code></td><td width="50%">&nbsp;</td></tr>
+</table>
+
+## Current algorithm inventory
+
+**22 exact strategies + 19 heuristics = 41 public `IUlsSolver` strategies.**
 
 ## Documentation structure
 
