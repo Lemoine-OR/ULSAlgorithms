@@ -24,6 +24,7 @@ This API site is the technical reference generated directly from the C# source a
 
 - @subpage optimization_solver_integration
 - @subpage solver_adapters
+- @subpage mathematical_formulations
 - @subpage cut_generation_traceability
 
 ## Engineering and science

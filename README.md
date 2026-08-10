@@ -33,7 +33,8 @@ The current algorithm catalog contains:
 
 - **16 exact algorithms**;
 - **11 heuristics**;
-- **27 public solving strategies** sharing `IUlsSolver`.
+- **27 public solving strategies** sharing `IUlsSolver`;
+- **4 classical solver-independent mathematical formulations**.
 
 Solver-backed infrastructure includes four concrete optional machine-discovery adapters and complete cutting-plane traceability.
 
@@ -57,6 +58,21 @@ This order intentionally matches LotSizingDataModel.
 Starting with v0.16.0, all four concrete discovery adapters are built into ULSAlgorithms. Selection is based on **real adapter availability and required capabilities**. An installed solver that cannot load, has no usable license, or lacks a required capability is skipped with diagnostics.
 
 The caller may still explicitly request a concrete solver and may disable fallback.
+
+## Mathematical programming formulations
+
+v0.17.0 adds four explicit ULS formulations behind a common builder contract:
+
+| Formulation | Main variables | Applicability |
+|---|---|---|
+| Aggregate inventory balance | `x`, `y`, `I` | general classical ULS |
+| Facility location / disaggregated | `q[t,k]`, `y` | general classical ULS |
+| Regeneration shortest path | arc flow `z[i,j]` | Wagner–Whitin / no speculative motive |
+| Inventory eliminated | `x`, `y` | general classical ULS |
+
+Each builder returns a solver-independent `LinearModel` plus semantic variable mappings and scientific provenance.
+
+These formulation builders do **not** select or invoke a solver. The execution layer will consume them later through the already-defined automatic CPLEX → Gurobi → Xpress → CBC policy.
 
 ## Cutting-plane traceability
 
@@ -86,6 +102,7 @@ In addition to algorithm documentation, see:
 
 - **Optimization Solver Integration**
 - **Concrete Solver Adapters**
+- **Mathematical Programming Formulations**
 - **Cut Generation Traceability**
 - **Validation & Benchmarks**
 - **Scientific References**
@@ -113,12 +130,16 @@ Console.WriteLine($"Status: {result.Status}");
 Console.WriteLine($"Objective: {result.ObjectiveValue}");
 ```
 
-All exact methods and heuristics use:
+## Build a mathematical formulation
 
 ```csharp
-UlsSolveResult Solve(
-    UlsProblem problem,
-    CancellationToken cancellationToken = default);
+using ULSAlgorithms.Formulations.Aggregate;
+
+var builder = new AggregateInventoryFormulationBuilder();
+UlsFormulation formulation = builder.Build(problem);
+
+Console.WriteLine(formulation.Model.VariableCount);
+Console.WriteLine(formulation.Model.ConstraintCount);
 ```
 
 ## Automatic optimization-solver selection
@@ -134,17 +155,6 @@ SolverSelectionResult selection =
     await OptimizationSolverDiscovery.SelectAsync(
         SolverKind.Automatic,
         options,
-        cancellationToken);
-
-Console.WriteLine(selection.SelectedSolver);
-Console.WriteLine(selection.Availability?.SolverVersion);
-```
-
-To inspect every solver found on the machine:
-
-```csharp
-SolverDiscoveryReport report =
-    await OptimizationSolverDiscovery.DiscoverAllAsync(
         cancellationToken);
 ```
 
@@ -166,20 +176,22 @@ SolverDiscoveryReport report =
 ```text
 ULSAlgorithms/
 ├── src/ULSAlgorithms/
-│   ├── Abstractions/      common ULS strategy contract
-│   ├── Models/            validated ULS problem
-│   ├── Results/           solution and solve-status model
-│   ├── Exact/             exact algorithms by family
-│   ├── Heuristics/        heuristic strategies
+│   ├── Abstractions/
+│   ├── Models/
+│   ├── Results/
+│   ├── Exact/
+│   ├── Heuristics/
+│   ├── Formulations/      aggregate / facility / shortest path / no-inventory
 │   ├── Optimization/
+│   │   ├── Modeling/      portable solver-independent linear model
 │   │   ├── Adapters/      CPLEX / Gurobi / Xpress / CBC discovery
-│   │   └── External/      optional process/runtime probing
-│   └── CuttingPlanes/     solver-independent cut traceability
-├── tests/                 xUnit validation and cross-checks
-├── benchmarks/            BenchmarkDotNet suites
-├── docs/                  portal, API, scientific documentation
-├── build/                 validated build and release automation
-└── tools/                 versioning and tooling bootstrap scripts
+│   │   └── External/
+│   └── CuttingPlanes/
+├── tests/
+├── benchmarks/
+├── docs/
+├── build/
+└── tools/
 ```
 
 ## Validation philosophy
@@ -190,9 +202,9 @@ The project combines deterministic reference instances, randomized campaigns,
 independent exact oracles, cross-validation, cancellation tests, applicability
 tests and BenchmarkDotNet measurements.
 
-Solver-backed infrastructure is tested separately for deterministic selection
-order, capability filtering, fallback behavior, concrete adapter registration,
-machine-discovery metadata and complete generated/added cut accounting.
+Mathematical formulations are tested independently of commercial solvers for
+variable domains, tight ULS bounds, cost transformation, zero-demand handling
+and applicability conditions.
 
 Heuristics return **`Feasible`**, never `Optimal`. Exact methods return
 **`Optimal`** only after completing an exact algorithm.
@@ -209,30 +221,19 @@ powershell -ExecutionPolicy Bypass -File ".\build\Build-Validated.ps1"
 ```
 
 The main project has no compile-time dependency on CPLEX, Gurobi, Xpress or CBC.
-Provider runtimes are detected only when solver discovery is requested.
-
-For documentation:
-
-```powershell
-.\tools\Install-Graphviz.ps1
-.\tools\Install-Doxygen.ps1
-.\docs\build-documentation.ps1
-```
 
 ## Releases and reproducibility
 
-Public releases are created only through the validated GitHub Actions release
-workflow.
+Public releases are created only through the validated GitHub Actions release workflow.
 
 A release contains the binary ZIP, documentation ZIP, build metadata,
-manifests and SHA-256 checksums. Solver-backed execution reports also retain the
-concrete solver and adapter identity selected on the execution machine.
+manifests and SHA-256 checksums.
 
 ## Scientific provenance
 
 ULSAlgorithms does not hide the literature behind a single black-box solver.
-Public algorithms preserve their scientific identity, assumptions, complexity
-and implementation provenance.
+Public algorithms and formulations preserve their scientific identity,
+assumptions and implementation provenance.
 
 See the [Scientific References](https://lemoine-or.github.io/ULSAlgorithms/api/scientific_references.html).
 
