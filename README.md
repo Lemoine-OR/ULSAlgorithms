@@ -25,27 +25,115 @@
 
 ## Overview
 
-**ULSAlgorithms** is a research-oriented C# library for deterministic **Uncapacitated Lot-Sizing (ULS)**.
+**ULSAlgorithms** is a research-oriented C# library for deterministic
+**Uncapacitated Lot-Sizing (ULS)**.
 
-The repository keeps historically important algorithms as distinct public
-implementations so their scientific identity, assumptions, complexity and
-performance remain independently testable.
+The library now contains:
 
-The current library contains:
-
-- **16 exact algorithms**;
+- **16 direct/native exact algorithms**;
+- **4 solver-backed exact formulation strategies**;
+- **20 exact `IUlsSolver` strategies in total**;
 - **11 heuristics**;
-- **27 public `IUlsSolver` strategies**;
-- **4 classical mathematical-programming formulations**;
+- **31 public solving strategies**;
 - automatic **CPLEX → Gurobi → Xpress → CBC** discovery;
-- a solver-independent mathematical-model execution layer;
-- complete cutting-plane traceability infrastructure.
+- a provider-independent linear-model execution layer;
+- two-level independent solution validation;
+- cutting-plane traceability infrastructure.
 
 Developed and maintained by **David Lemoine — Lemoine-OR**.
 
+## Use a formulation like any other exact solver
+
+```csharp
+using ULSAlgorithms.Abstractions;
+using ULSAlgorithms.Exact.Formulations;
+
+IUlsSolver solver =
+    new AggregateInventoryFormulationSolver();
+
+UlsSolveResult result =
+    solver.Solve(problem);
+```
+
+The same common `IUlsSolver` contract is used by Wagner–Whitin, Wagelmans,
+Federgruen–Tzur, classical heuristics and the solver-backed formulations.
+
+## Asynchronous solver-backed API
+
+```csharp
+IAsyncUlsSolver solver =
+    new FacilityLocationFormulationSolver();
+
+UlsSolveResult result =
+    await solver.SolveAsync(
+        problem,
+        cancellationToken);
+```
+
+The four public formulation strategies are:
+
+```text
+AggregateInventoryFormulationSolver
+FacilityLocationFormulationSolver
+ShortestPathFormulationSolver
+InventoryEliminatedFormulationSolver
+```
+
+## Solver provenance
+
+When the result comes from a formulation strategy:
+
+```csharp
+if (result is SolverBackedUlsSolveResult solverBacked)
+{
+    Console.WriteLine(solverBacked.FormulationKind);
+    Console.WriteLine(
+        solverBacked.OptimizationSolver?.SelectedSolver);
+    Console.WriteLine(
+        solverBacked.OptimizationSolver?.SolverVersion);
+}
+```
+
+Thus a published benchmark can retain both the mathematical formulation and the
+actual optimization engine used on the machine.
+
+## Two validation layers
+
+A solver-backed solution must pass:
+
+```text
+native solver
+    ↓
+portable LinearModel checker
+    ↓
+formulation → UlsSolution reconstruction
+    ↓
+ULS-domain checker
+    ↓
+objective agreement check
+    ↓
+Optimal / Feasible
+```
+
+The public `UlsSolutionValidator` independently checks material balance, final
+inventory, setup linking and every cost component.
+
+## Numerical normalization
+
+The numerical cleanup introduced in v0.18.0 is retained:
+
+```text
+zero tolerance          1e-8
+integrality tolerance   1e-7
+near-integer tolerance  1e-8
+```
+
+Small numerical residues are cleaned; materially incorrect values are never
+silently rounded.
+
 ## Automatic solver policy
 
-Solver-backed methods use the same priority as LotSizingDataModel:
+Solver-backed methods use:
 
 ```text
 1. IBM ILOG CPLEX
@@ -53,72 +141,6 @@ Solver-backed methods use the same priority as LotSizingDataModel:
 3. FICO Xpress
 4. COIN-OR CBC
 ```
-
-An installed but unusable solver is skipped when automatic selection is used.
-
-## Mathematical formulations
-
-The four current builders are:
-
-```text
-AggregateInventoryFormulationBuilder
-FacilityLocationFormulationBuilder
-ShortestPathFormulationBuilder
-InventoryEliminatedFormulationBuilder
-```
-
-They return a provider-independent `LinearModel`.
-
-## Execute a portable model
-
-Starting with v0.18.0:
-
-```csharp
-var formulation =
-    new AggregateInventoryFormulationBuilder()
-        .Build(problem);
-
-var modelSolver =
-    new LinearModelSolver();
-
-LinearModelSolveResult result =
-    await modelSolver.SolveAsync(
-        formulation.Model,
-        new LinearModelSolveOptions
-        {
-            Solver = SolverKind.Automatic
-        },
-        cancellationToken);
-
-Console.WriteLine(result.Solver?.SelectedSolver);
-Console.WriteLine(result.Status);
-Console.WriteLine(result.ObjectiveValue);
-```
-
-The execution backend is selected only after the model has been built.
-
-## Independent validation
-
-Every returned candidate solution is checked again against the portable model.
-
-The checker verifies:
-
-- bounds;
-- binary/integer integrality;
-- every linear constraint;
-- objective reconstruction.
-
-A native solver cannot produce an `Optimal` ULSAlgorithms result when the
-independent checker rejects its returned values.
-
-## Provider execution
-
-| Solver | Execution mechanism |
-|---|---|
-| CPLEX | stand-alone `cplex` executable + XML `.sol` parser |
-| Gurobi | `gurobi_cl` + portable text solution |
-| Xpress | `Optimizer.dll` reflection (`ReadProb` / `Optimize` / `GetSolution`) |
-| CBC | stand-alone `cbc` executable + portable text solution |
 
 No commercial solver assembly is referenced at compile time.
 
@@ -128,33 +150,9 @@ The existing cutting-plane report records every generated `(l,S)` inequality,
 whether it was added, its iteration, violation, efficacy, coefficients,
 disposition and solver row name.
 
-The future `(l,S)` algorithms will use the same execution layer introduced in
-v0.18.0.
-
-## Repository architecture
-
-```text
-ULSAlgorithms/
-├── src/ULSAlgorithms/
-│   ├── Abstractions/
-│   ├── Models/
-│   ├── Results/
-│   ├── Exact/
-│   ├── Heuristics/
-│   ├── Formulations/
-│   ├── Optimization/
-│   │   ├── Modeling/
-│   │   ├── Adapters/
-│   │   ├── Execution/
-│   │   │   └── Providers/
-│   │   └── External/
-│   └── CuttingPlanes/
-├── tests/
-├── benchmarks/
-├── docs/
-├── build/
-└── tools/
-```
+With the formulation strategies and reconstruction layer complete, the next
+solver-backed algorithm family can reuse the same execution and validation
+pipeline.
 
 ## Build from source
 
@@ -162,13 +160,11 @@ ULSAlgorithms/
 powershell -ExecutionPolicy Bypass -File ".\build\Build-Validated.ps1"
 ```
 
-The main project has no compile-time dependency on CPLEX, Gurobi, Xpress or CBC.
-
 ## Scientific provenance
 
-ULSAlgorithms does not hide the literature behind a single black-box solver.
-Public algorithms and formulations preserve their source, assumptions and
-implementation provenance.
+ULSAlgorithms keeps direct algorithms and mathematical formulations as separate
+public implementations so their assumptions, scientific sources, complexity and
+computational behavior remain independently citable and benchmarkable.
 
 See the [Scientific References](https://lemoine-or.github.io/ULSAlgorithms/api/scientific_references.html).
 

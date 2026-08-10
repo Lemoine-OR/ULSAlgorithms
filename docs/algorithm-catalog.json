@@ -193,6 +193,54 @@
       "publication": "Zangwill (1969)",
       "doi": "10.1287/mnsc.15.9.506",
       "implementation": "Backward DAG shortest path"
+    },
+    {
+      "name": "Aggregate inventory formulation",
+      "class": "AggregateInventoryFormulationSolver",
+      "family": "Solver-backed mathematical formulation",
+      "time": "Solver-dependent",
+      "space": "O(T) model + solver",
+      "applicability": "General classical ULS",
+      "sourcePath": "src/ULSAlgorithms/Exact/Formulations/AggregateInventoryFormulationSolver.cs",
+      "publication": "Wagner & Whitin (1958); Brahimi et al. (2006)",
+      "doi": "10.1287/mnsc.5.1.89",
+      "implementation": "Aggregate x/y/I MILP with automatic solver selection"
+    },
+    {
+      "name": "Facility-location formulation",
+      "class": "FacilityLocationFormulationSolver",
+      "family": "Solver-backed mathematical formulation",
+      "time": "Solver-dependent",
+      "space": "O(T²) model + solver",
+      "applicability": "General classical ULS",
+      "sourcePath": "src/ULSAlgorithms/Exact/Formulations/FacilityLocationFormulationSolver.cs",
+      "publication": "Krarup & Bilde (1977); Brahimi et al. (2006)",
+      "doi": "10.1007/978-3-0348-5936-3_10",
+      "implementation": "Disaggregated q[t,k]/y formulation"
+    },
+    {
+      "name": "Shortest-path formulation",
+      "class": "ShortestPathFormulationSolver",
+      "family": "Solver-backed network formulation",
+      "time": "Solver-dependent",
+      "space": "O(T²) model + solver",
+      "applicability": "No speculative motive / Wagner–Whitin costs",
+      "sourcePath": "src/ULSAlgorithms/Exact/Formulations/ShortestPathFormulationSolver.cs",
+      "publication": "Zangwill (1969); Brahimi et al. (2006)",
+      "doi": "10.1287/mnsc.15.9.506",
+      "implementation": "Continuous network-flow formulation with path reconstruction"
+    },
+    {
+      "name": "Inventory-eliminated formulation",
+      "class": "InventoryEliminatedFormulationSolver",
+      "family": "Solver-backed mathematical formulation",
+      "time": "Solver-dependent",
+      "space": "O(T) variables + O(T²) coefficients/constraints",
+      "applicability": "General classical ULS",
+      "sourcePath": "src/ULSAlgorithms/Exact/Formulations/InventoryEliminatedFormulationSolver.cs",
+      "publication": "Brahimi et al. (2006)",
+      "doi": "10.1016/j.ejor.2004.01.054",
+      "implementation": "Aggregate x/y formulation with inventory algebraically eliminated"
     }
   ],
   "heuristics": [
