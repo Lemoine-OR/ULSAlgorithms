@@ -61,6 +61,22 @@ switch over concrete strategy classes.
 
 Every public algorithm still implements the same `IUlsSolver` contract.
 
+For constructor-level configuration, use the overload introduced in v0.27.0:
+
+```csharp
+var solver =
+    UlsSolverFactory.Create(
+        "lyu-lee-parallel",
+        new UlsSolverCreationOptions
+        {
+            MaxDegreeOfParallelism = 4,
+            ParallelThreshold = 256
+        });
+```
+
+See @ref solver_catalog_factory for adaptive fallback, external optimization
+engine and cutting-plane examples.
+
 ## 3. Solve
 
 ```csharp

@@ -94,7 +94,7 @@ internal static class Program
     private static string BuildCatalogJson()
     {
         var document = new CatalogDocument(
-            SchemaVersion: 2,
+            SchemaVersion: 3,
             Project: "ULSAlgorithms",
             GeneratedFrom: "ULSAlgorithms.Catalog.UlsSolverCatalog",
             Exact: UlsSolverCatalog.Exact
@@ -125,10 +125,45 @@ internal static class Program
             Space: descriptor.SpaceComplexity,
             Applicability: descriptor.Applicability,
             RequiresExternalSolver: descriptor.RequiresExternalSolver,
+            ConfigurationCapabilities:
+                ConfigurationCapabilityNames(
+                    descriptor.ConfigurationCapabilities),
             SourcePath: descriptor.SourcePath,
             Publication: descriptor.ScientificReference,
             Doi: descriptor.Doi,
             Implementation: descriptor.Implementation);
+
+    private static string[] ConfigurationCapabilityNames(
+        UlsSolverConfigurationCapabilities capabilities)
+    {
+        var names = new List<string>(4);
+
+        if ((capabilities &
+             UlsSolverConfigurationCapabilities.AdaptiveGeneralFallback) != 0)
+        {
+            names.Add("adaptive-general-fallback");
+        }
+
+        if ((capabilities &
+             UlsSolverConfigurationCapabilities.Parallelism) != 0)
+        {
+            names.Add("parallelism");
+        }
+
+        if ((capabilities &
+             UlsSolverConfigurationCapabilities.OptimizationExecution) != 0)
+        {
+            names.Add("optimization-execution");
+        }
+
+        if ((capabilities &
+             UlsSolverConfigurationCapabilities.CuttingPlane) != 0)
+        {
+            names.Add("cutting-plane");
+        }
+
+        return names.ToArray();
+    }
 
     private static string CategoryName(
         UlsSolverCategory category) =>
@@ -176,6 +211,7 @@ internal static class Program
         string Space,
         string Applicability,
         bool RequiresExternalSolver,
+        string[] ConfigurationCapabilities,
         string SourcePath,
         string Publication,
         string Doi,

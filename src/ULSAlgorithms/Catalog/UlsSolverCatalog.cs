@@ -13,9 +13,9 @@ namespace ULSAlgorithms.Catalog;
 /// generated projection of this runtime catalog and is validated by CI.
 /// </para>
 /// <para>
-/// The catalog stores factories, not singleton solver instances. Each call to
-/// <see cref="UlsSolverDescriptor.Create"/> or <see cref="UlsSolverFactory.Create"/>
-/// returns a fresh strategy instance.
+/// The catalog stores default and, where supported, configured factories rather
+/// than singleton solver instances. Each construction call returns a fresh
+/// strategy instance.
 /// </para>
 /// </remarks>
 public static class UlsSolverCatalog
@@ -35,7 +35,11 @@ public static class UlsSolverCatalog
             "Selects the linear Wagner-Whitin specialization when applicable; otherwise uses a configurable O(T log T) general exact fallback",
             "src/ULSAlgorithms/Selection/AdaptiveExactUlsSolver.cs",
             typeof(global::ULSAlgorithms.Selection.AdaptiveExactUlsSolver),
-            static () => new global::ULSAlgorithms.Selection.AdaptiveExactUlsSolver()),
+            static () => new global::ULSAlgorithms.Selection.AdaptiveExactUlsSolver(),
+            UlsSolverConfigurationCapabilities.AdaptiveGeneralFallback,
+            static options => new global::ULSAlgorithms.Selection.AdaptiveExactUlsSolver(
+                options.AdaptiveGeneralFallback ??
+                global::ULSAlgorithms.Selection.UlsGeneralExactFallback.WagelmansGeneral)),
         new(
             "wagner-whitin-classical",
             "Wagner–Whitin classical",
@@ -217,7 +221,11 @@ public static class UlsSolverCatalog
             "Modern shared-memory reconstruction",
             "src/ULSAlgorithms/Exact/Parallel/LyuLeeParallelSolver.cs",
             typeof(global::ULSAlgorithms.Exact.Parallel.LyuLeeParallelSolver),
-            static () => new global::ULSAlgorithms.Exact.Parallel.LyuLeeParallelSolver()),
+            static () => new global::ULSAlgorithms.Exact.Parallel.LyuLeeParallelSolver(),
+            UlsSolverConfigurationCapabilities.Parallelism,
+            static options => new global::ULSAlgorithms.Exact.Parallel.LyuLeeParallelSolver(
+                options.MaxDegreeOfParallelism ?? -1,
+                options.ParallelThreshold ?? 128)),
         new(
             "saydam-mcknew",
             "Saydam–McKnew",
@@ -273,7 +281,10 @@ public static class UlsSolverCatalog
             "Aggregate x/y/I MILP with automatic solver selection",
             "src/ULSAlgorithms/Exact/Formulations/AggregateInventoryFormulationSolver.cs",
             typeof(global::ULSAlgorithms.Exact.Formulations.AggregateInventoryFormulationSolver),
-            static () => new global::ULSAlgorithms.Exact.Formulations.AggregateInventoryFormulationSolver()),
+            static () => new global::ULSAlgorithms.Exact.Formulations.AggregateInventoryFormulationSolver(),
+            UlsSolverConfigurationCapabilities.OptimizationExecution,
+            static options => new global::ULSAlgorithms.Exact.Formulations.AggregateInventoryFormulationSolver(
+                options.OptimizationExecution)),
         new(
             "facility-location-formulation",
             "Facility-location formulation",
@@ -287,7 +298,10 @@ public static class UlsSolverCatalog
             "Disaggregated q[t,k]/y formulation",
             "src/ULSAlgorithms/Exact/Formulations/FacilityLocationFormulationSolver.cs",
             typeof(global::ULSAlgorithms.Exact.Formulations.FacilityLocationFormulationSolver),
-            static () => new global::ULSAlgorithms.Exact.Formulations.FacilityLocationFormulationSolver()),
+            static () => new global::ULSAlgorithms.Exact.Formulations.FacilityLocationFormulationSolver(),
+            UlsSolverConfigurationCapabilities.OptimizationExecution,
+            static options => new global::ULSAlgorithms.Exact.Formulations.FacilityLocationFormulationSolver(
+                options.OptimizationExecution)),
         new(
             "shortest-path-formulation",
             "Shortest-path formulation",
@@ -301,7 +315,10 @@ public static class UlsSolverCatalog
             "Continuous network-flow formulation with path reconstruction",
             "src/ULSAlgorithms/Exact/Formulations/ShortestPathFormulationSolver.cs",
             typeof(global::ULSAlgorithms.Exact.Formulations.ShortestPathFormulationSolver),
-            static () => new global::ULSAlgorithms.Exact.Formulations.ShortestPathFormulationSolver()),
+            static () => new global::ULSAlgorithms.Exact.Formulations.ShortestPathFormulationSolver(),
+            UlsSolverConfigurationCapabilities.OptimizationExecution,
+            static options => new global::ULSAlgorithms.Exact.Formulations.ShortestPathFormulationSolver(
+                options.OptimizationExecution)),
         new(
             "inventory-eliminated-formulation",
             "Inventory-eliminated formulation",
@@ -315,7 +332,10 @@ public static class UlsSolverCatalog
             "Aggregate x/y formulation with inventory algebraically eliminated",
             "src/ULSAlgorithms/Exact/Formulations/InventoryEliminatedFormulationSolver.cs",
             typeof(global::ULSAlgorithms.Exact.Formulations.InventoryEliminatedFormulationSolver),
-            static () => new global::ULSAlgorithms.Exact.Formulations.InventoryEliminatedFormulationSolver()),
+            static () => new global::ULSAlgorithms.Exact.Formulations.InventoryEliminatedFormulationSolver(),
+            UlsSolverConfigurationCapabilities.OptimizationExecution,
+            static options => new global::ULSAlgorithms.Exact.Formulations.InventoryEliminatedFormulationSolver(
+                options.OptimizationExecution)),
         new(
             "general-ls-cutting-plane",
             "General (l,S) cutting-plane",
@@ -329,7 +349,12 @@ public static class UlsSolverCatalog
             "Exact general (l,S) separation + strengthened final MILP",
             "src/ULSAlgorithms/Exact/CuttingPlanes/GeneralLsCuttingPlaneSolver.cs",
             typeof(global::ULSAlgorithms.Exact.CuttingPlanes.GeneralLsCuttingPlaneSolver),
-            static () => new global::ULSAlgorithms.Exact.CuttingPlanes.GeneralLsCuttingPlaneSolver()),
+            static () => new global::ULSAlgorithms.Exact.CuttingPlanes.GeneralLsCuttingPlaneSolver(),
+            UlsSolverConfigurationCapabilities.OptimizationExecution |
+            UlsSolverConfigurationCapabilities.CuttingPlane,
+            static options => new global::ULSAlgorithms.Exact.CuttingPlanes.GeneralLsCuttingPlaneSolver(
+                options.OptimizationExecution,
+                options.CuttingPlane)),
         new(
             "wagner-whitin-ls-cutting-plane",
             "Wagner–Whitin (l,S) cutting-plane",
@@ -343,7 +368,12 @@ public static class UlsSolverCatalog
             "O(T²) prefix-S Wagner–Whitin separation + strengthened final MILP",
             "src/ULSAlgorithms/Exact/CuttingPlanes/WagnerWhitinLsCuttingPlaneSolver.cs",
             typeof(global::ULSAlgorithms.Exact.CuttingPlanes.WagnerWhitinLsCuttingPlaneSolver),
-            static () => new global::ULSAlgorithms.Exact.CuttingPlanes.WagnerWhitinLsCuttingPlaneSolver()),
+            static () => new global::ULSAlgorithms.Exact.CuttingPlanes.WagnerWhitinLsCuttingPlaneSolver(),
+            UlsSolverConfigurationCapabilities.OptimizationExecution |
+            UlsSolverConfigurationCapabilities.CuttingPlane,
+            static options => new global::ULSAlgorithms.Exact.CuttingPlanes.WagnerWhitinLsCuttingPlaneSolver(
+                options.OptimizationExecution,
+                options.CuttingPlane)),
         new(
             "lot-for-lot",
             "Lot-for-Lot",
@@ -653,6 +683,12 @@ public static class UlsSolverCatalog
                     descriptor.Category == UlsSolverCategory.Heuristic)
                 .ToArray());
 
+    private static readonly IReadOnlyList<UlsSolverDescriptor> ConfigurableView =
+        Array.AsReadOnly(
+            Descriptors
+                .Where(descriptor => descriptor.SupportsConfiguration)
+                .ToArray());
+
     /// <summary>Gets all public strategies in stable catalog order.</summary>
     public static IReadOnlyList<UlsSolverDescriptor> All => AllView;
 
@@ -673,6 +709,13 @@ public static class UlsSolverCatalog
 
     /// <summary>Gets all heuristic strategies.</summary>
     public static IReadOnlyList<UlsSolverDescriptor> Heuristics => HeuristicsView;
+
+    /// <summary>
+    /// Gets strategies exposing at least one constructor-level configurable
+    /// factory setting.
+    /// </summary>
+    public static IReadOnlyList<UlsSolverDescriptor> Configurable =>
+        ConfigurableView;
 
     /// <summary>
     /// Gets the recommended automatic exact entry point.

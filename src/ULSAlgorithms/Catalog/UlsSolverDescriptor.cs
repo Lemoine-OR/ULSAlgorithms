@@ -8,6 +8,7 @@ namespace ULSAlgorithms.Catalog;
 public sealed class UlsSolverDescriptor
 {
     private readonly Func<IUlsSolver> _factory;
+    private readonly Func<UlsSolverCreationOptions, IUlsSolver>? _configuredFactory;
 
     internal UlsSolverDescriptor(
         string id,
@@ -22,7 +23,10 @@ public sealed class UlsSolverDescriptor
         string implementation,
         string sourcePath,
         Type implementationType,
-        Func<IUlsSolver> factory)
+        Func<IUlsSolver> factory,
+        UlsSolverConfigurationCapabilities configurationCapabilities =
+            UlsSolverConfigurationCapabilities.None,
+        Func<UlsSolverCreationOptions, IUlsSolver>? configuredFactory = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -37,6 +41,9 @@ public sealed class UlsSolverDescriptor
         ArgumentNullException.ThrowIfNull(factory);
 
         ValidateStableId(id);
+        ValidateConfigurationFactory(
+            configurationCapabilities,
+            configuredFactory);
 
         if (!typeof(IUlsSolver).IsAssignableFrom(implementationType))
         {
@@ -63,7 +70,9 @@ public sealed class UlsSolverDescriptor
         RequiresExternalSolver =
             category is UlsSolverCategory.OptimizationFormulation
                 or UlsSolverCategory.CuttingPlane;
+        ConfigurationCapabilities = configurationCapabilities;
         _factory = factory;
+        _configuredFactory = configuredFactory;
     }
 
     /// <summary>
@@ -114,13 +123,62 @@ public sealed class UlsSolverDescriptor
     public Type ImplementationType { get; }
 
     /// <summary>
+    /// Gets the constructor-level settings supported by the configurable
+    /// factory for this strategy.
+    /// </summary>
+    public UlsSolverConfigurationCapabilities ConfigurationCapabilities { get; }
+
+    /// <summary>
+    /// Gets whether this strategy exposes at least one configurable factory
+    /// setting.
+    /// </summary>
+    public bool SupportsConfiguration =>
+        ConfigurationCapabilities !=
+        UlsSolverConfigurationCapabilities.None;
+
+    /// <summary>
     /// Creates a new solver instance using the strategy's default constructor
     /// policy.
     /// </summary>
     /// <returns>A fresh public solver instance.</returns>
-    public IUlsSolver Create()
+    public IUlsSolver Create() =>
+        ValidateCreatedSolver(
+            _factory());
+
+    /// <summary>
+    /// Creates a new solver instance using explicit constructor-level
+    /// configuration.
+    /// </summary>
+    /// <param name="options">Composed factory options.</param>
+    /// <returns>A fresh configured solver instance.</returns>
+    /// <remarks>
+    /// An empty option set is equivalent to <see cref="Create()"/>.
+    /// Unsupported non-empty options are rejected.
+    /// </remarks>
+    public IUlsSolver Create(UlsSolverCreationOptions options)
     {
-        var solver = _factory();
+        ArgumentNullException.ThrowIfNull(options);
+
+        if (options.IsEmpty)
+        {
+            return Create();
+        }
+
+        options.EnsureValidFor(this);
+
+        if (_configuredFactory is null)
+        {
+            throw new InvalidOperationException(
+                $"Solver '{Id}' does not expose configurable construction.");
+        }
+
+        return ValidateCreatedSolver(
+            _configuredFactory(options));
+    }
+
+    private IUlsSolver ValidateCreatedSolver(IUlsSolver solver)
+    {
+        ArgumentNullException.ThrowIfNull(solver);
 
         if (solver.GetType() != ImplementationType)
         {
@@ -136,6 +194,27 @@ public sealed class UlsSolverDescriptor
         }
 
         return solver;
+    }
+
+    private static void ValidateConfigurationFactory(
+        UlsSolverConfigurationCapabilities capabilities,
+        Func<UlsSolverCreationOptions, IUlsSolver>? configuredFactory)
+    {
+        if (capabilities == UlsSolverConfigurationCapabilities.None &&
+            configuredFactory is not null)
+        {
+            throw new ArgumentException(
+                "A configured factory requires at least one configuration capability.",
+                nameof(configuredFactory));
+        }
+
+        if (capabilities != UlsSolverConfigurationCapabilities.None &&
+            configuredFactory is null)
+        {
+            throw new ArgumentException(
+                "Configuration capabilities require a configured factory.",
+                nameof(configuredFactory));
+        }
     }
 
     private static void ValidateStableId(string id)

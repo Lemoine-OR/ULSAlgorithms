@@ -2,8 +2,9 @@
 
 # Solver Catalog and Factory
 
-v0.26.0 exposes the complete public strategy inventory as runtime metadata.
-The catalog is intended for reusable subproblem libraries, experiment runners,
+v0.26.0 exposed the complete public strategy inventory as runtime metadata.
+v0.27.0 extends the same catalog with strict constructor-level configuration.
+The API is intended for reusable subproblem libraries, experiment runners,
 configuration-driven applications, consoles and graphical interfaces.
 
 ## Complete inventory
@@ -28,6 +29,7 @@ The current inventory is:
 | `UlsSolverCatalog.Formulations` | 4 |
 | `UlsSolverCatalog.CuttingPlanes` | 2 |
 | `UlsSolverCatalog.Heuristics` | 19 |
+| `UlsSolverCatalog.Configurable` | 8 |
 
 `Exact` includes the 17 direct exact algorithms, four solver-backed
 formulations and two cutting-plane strategies.
@@ -108,9 +110,150 @@ Each `UlsSolverDescriptor` provides:
 - `Implementation`
 - `SourcePath`
 - `ImplementationType`
+- `ConfigurationCapabilities`
+- `SupportsConfiguration`
 
 The metadata is descriptive. Applicability text does not replace the
 strategy-specific runtime guards already implemented by individual solvers.
+
+## Configure construction in v0.27.0
+
+The historical API remains unchanged:
+
+```csharp
+IUlsSolver solver =
+    UlsSolverFactory.Create("wagelmans-general");
+```
+
+A second overload accepts `UlsSolverCreationOptions`:
+
+```csharp
+var options =
+    new UlsSolverCreationOptions
+    {
+        AdaptiveGeneralFallback =
+            UlsGeneralExactFallback.FedergruenTzurGeneral
+    };
+
+IUlsSolver solver =
+    UlsSolverFactory.Create(
+        "adaptive-exact",
+        options);
+```
+
+Configuration is strict. A non-empty setting that does not belong to the
+selected strategy throws instead of being silently ignored.
+
+### Adaptive fallback
+
+```csharp
+var solver =
+    UlsSolverFactory.Create(
+        "adaptive-exact",
+        new UlsSolverCreationOptions
+        {
+            AdaptiveGeneralFallback =
+                UlsGeneralExactFallback.FedergruenTzurGeneral
+        });
+```
+
+The default remains Wagelmans general. This option exists for reproducible
+research and explicit policy control; v0.25.0 benchmark evidence still supports
+Wagelmans as the default general fallback.
+
+### Lyu-Lee parallel execution
+
+```csharp
+var solver =
+    UlsSolverFactory.Create(
+        "lyu-lee-parallel",
+        new UlsSolverCreationOptions
+        {
+            MaxDegreeOfParallelism = 4,
+            ParallelThreshold = 256
+        });
+```
+
+Unspecified fields preserve the existing `LyuLeeParallelSolver` defaults.
+
+### Choose an external optimization engine
+
+The factory reuses `LinearModelSolveOptions`; it does not introduce a second
+solver-configuration model.
+
+```csharp
+using ULSAlgorithms.Optimization;
+using ULSAlgorithms.Optimization.Execution;
+
+var solver =
+    UlsSolverFactory.Create(
+        "aggregate-inventory-formulation",
+        new UlsSolverCreationOptions
+        {
+            OptimizationExecution =
+                new LinearModelSolveOptions
+                {
+                    Solver = SolverKind.CoinOrCbc,
+                    AllowFallbackWhenExplicit = false
+                }
+        });
+```
+
+`SolverKind.Automatic` retains the normal CPLEX → Gurobi → Xpress → CBC
+priority. Explicit `Cplex`, `Gurobi`, `Xpress` and `CoinOrCbc` values are also
+available.
+
+The full `LinearModelSolveOptions` object remains available, including
+feasibility/integrality tolerances, model export, temporary-file retention and
+temporary-root settings.
+
+### Configure cutting planes
+
+Cutting-plane strategies accept both solver execution options and the existing
+`LsCuttingPlaneOptions`:
+
+```csharp
+var solver =
+    UlsSolverFactory.Create(
+        "general-ls-cutting-plane",
+        new UlsSolverCreationOptions
+        {
+            OptimizationExecution =
+                new LinearModelSolveOptions
+                {
+                    Solver = SolverKind.Automatic
+                },
+            CuttingPlane =
+                new LsCuttingPlaneOptions
+                {
+                    MaximumIterations = 20,
+                    MaximumCutsPerIteration = 10
+                }
+        });
+```
+
+The existing cutting-plane object continues to control violation tolerance,
+minimum efficacy and cut-selection policy as well.
+
+### Discover configuration capabilities
+
+```csharp
+foreach (var strategy in UlsSolverCatalog.Configurable)
+{
+    Console.WriteLine(
+        $"{strategy.Id}: {strategy.ConfigurationCapabilities}");
+}
+```
+
+The current capability flags are:
+
+- `AdaptiveGeneralFallback`
+- `Parallelism`
+- `OptimizationExecution`
+- `CuttingPlane`
+
+This metadata is also projected into `docs/algorithm-catalog.json`, allowing
+configuration-driven UIs to expose only relevant controls.
 
 ## Recommended automatic exact entry point
 
