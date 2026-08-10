@@ -28,69 +28,45 @@
 **ULSAlgorithms** is a research-oriented C# library for deterministic
 **Uncapacitated Lot-Sizing (ULS)**.
 
-The library currently contains:
+The library now contains:
 
 - **22 exact `IUlsSolver` strategies**;
-- **11 heuristics**;
-- **33 public solving strategies**;
+- **15 heuristic `IUlsSolver` strategies**;
+- **37 public solving strategies**;
 - four mathematical-programming formulations;
-- general and Wagner–Whitin `(l,S)` cutting-plane solvers;
+- general and Wagner-Whitin `(l,S)` cutting-plane solvers;
 - automatic **CPLEX → Gurobi → Xpress → CBC** discovery;
 - numerical normalization and independent solution checking;
-- cut-pool policies, convergence statistics and BenchmarkDotNet separator
-  benchmarks.
+- cutting-plane convergence engineering and BenchmarkDotNet benchmarks.
 
 Developed and maintained by **David Lemoine — Lemoine-OR**.
 
-## Cutting-plane engineering
+## v0.22.0 literature heuristics
 
-v0.21.0 adds configurable root cut-pool strategies:
+Four additional public methods are available:
 
 ```text
-AllViolated
-MostViolatedPerL
-TopByViolation
-TopByEfficacy
+PartPeriodSimplifiedSolver
+SegerstedtReformulatedSilverMealSolver
+ChiuModifiedLeastUnitCostSolver
+ChiuTingModifiedPartPeriodBalancingSolver
 ```
 
-Example:
+The release also separates **Part-Period Simplified / no-overshoot LTC** from
+nearest-EPP **Part-Period Balancing** instead of treating those rules as one
+algorithm.
 
-```csharp
-var cuts =
-    new LsCuttingPlaneOptions
-    {
-        SelectionPolicy =
-            CutSelectionPolicy.TopByViolation,
-        MaximumCutsPerIteration =
-            20,
-        MinimumEfficacy =
-            1e-4
-    };
+## Scientific sources
 
-IUlsSolver solver =
-    new GeneralLsCuttingPlaneSolver(
-        cuttingPlaneOptions: cuts);
-```
+- DeMatteis (1968), *An Economic Lot-Sizing Technique I: The Part-Period Algorithm*.
+- Baciarello et al. (2013), DOI `10.5772/56004`.
+- Segerstedt, Abdul-Jalbar & Samuelsson (2023),
+  DOI `10.3390/axioms12070661`.
+- Chiu (2004), DOI `10.1080/09720510.2004.10701115`.
+- Chiu, Ting & Chiu (2005), *A modified version of the part period lot-sizing heuristic*.
 
-Every generated cut remains traceable. Eligible cuts rejected only because of
-the pool policy receive `CutDisposition.NotSelected`.
-
-## Convergence
-
-`CuttingPlaneExecutionReport.Convergence` provides root bound evolution,
-LP/separation time, candidate counts, selected/added cuts, final MILP objective
-and the fraction of the initial root gap closed by `(l,S)` cuts.
-
-## Benchmarks
-
-`LsSeparationBenchmarks` compares the pure general and Wagner–Whitin separators
-for horizons 50, 100, 250 and 500, independently of external solver time.
-
-## Exactness
-
-Selection policies affect root strengthening only. The final model restores
-binary setup variables and is solved exactly with the same selected
-optimization engine.
+Methods whose detailed published rules are not yet available are not
+mislabelled or reconstructed from abstracts.
 
 ---
 

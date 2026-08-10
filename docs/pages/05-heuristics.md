@@ -2,46 +2,54 @@
 
 # Heuristics
 
-Heuristics share `IUlsSolver` with exact methods but return `UlsSolveStatus.Feasible`, never `Optimal`.
+Heuristics share `IUlsSolver` with exact methods but return
+`UlsSolveStatus.Feasible`, never `Optimal`.
 
 ## Baselines and fixed-cycle rules
 
 - `LotForLotSolver`
 - `PeriodicOrderQuantitySolver`
 
-These provide useful MRP-style reference policies.
-
 ## Average-cost rules
 
 - `SilverMealSolver`
+- `SegerstedtReformulatedSilverMealSolver`
 - `LeastUnitCostSolver`
+- `ChiuModifiedLeastUnitCostSolver`
 
-Silver–Meal divides relevant cost by covered periods. LUC uses covered units.
+The Segerstedt reformulation keeps Silver-Meal's elapsed-calendar denominator
+but evaluates only non-zero demand events as extension candidates.
+
+The Chiu LUC variant adds a final cost-beneficial last-lot merge test.
 
 ## Part-period family
 
+- `PartPeriodSimplifiedSolver`
 - `PartPeriodBalancingSolver`
+- `ChiuTingModifiedPartPeriodBalancingSolver`
 - `PattersonLaForgeIncrementalPartPeriodSolver`
 - `WemmerlovModifiedPartPeriodBalancingSolver`
 
-The methods differ in how the setup/holding balance is evaluated; they are intentionally separate implementations.
+`PartPeriodSimplifiedSolver` stops at the largest accumulation not exceeding the
+EPP. `PartPeriodBalancingSolver` instead selects the closest side of the EPP.
+They are intentionally separate public implementations.
 
 ## Marginal-cost rules
 
 - `GroffSolver`
 - `FreelandColleySolver`
 
-These use local incremental holding/setup comparisons.
-
 ## Look-Ahead / Look-Back
 
 - `WemmerlovPpbLookAheadLookBackSolver`
 - `WemmerlovModifiedPpbLookAheadLookBackSolver`
 
-These strategies apply Wemmerlöv's local LALB adjustment to PPB variants.
-
 ## Use as subproblem heuristics
 
-Because all heuristics implement the same strategy interface and use contiguous ULS input arrays, they are suitable as fast incumbent generators or comparison methods inside larger optimization workflows.
+All heuristics implement the same strategy interface and use contiguous ULS
+input arrays, making them suitable as fast incumbent generators or comparison
+methods inside larger optimization workflows.
 
 Always check the cost assumptions in @ref complexity_applicability.
+
+See also @ref literature_heuristics_v022.

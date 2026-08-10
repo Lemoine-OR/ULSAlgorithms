@@ -7,49 +7,30 @@ using ULSAlgorithms.Results;
 namespace ULSAlgorithms.Heuristics;
 
 /// <summary>
-/// Implements classical nearest-EPP Part-Period Balancing (PPB).
+/// Implements the modified Part-Period Balancing (mv-PPB) heuristic of
+/// Chiu, Ting and Chiu.
 /// </summary>
 /// <remarks>
 /// <para>
-/// The candidate lot is selected so that accumulated part-periods are as close
-/// as possible to the Economic Part Period <c>A/h</c>, considering both the
-/// last point below and the first point at/above the target.
+/// A standard nearest-EPP PPB plan is first generated. The published
+/// post-processing step then tests whether eliminating the final replenishment
+/// order by merging it into the preceding order strictly reduces total
+/// inventory cost.
 /// </para>
 /// <para>
-/// This is intentionally distinct from <see cref="PartPeriodSimplifiedSolver"/>,
-/// which stops before the first EPP overshoot.
-/// </para>
-/// <para>
-/// Early primary reference for the part-period algorithm:
-/// J. J. DeMatteis, "An Economic Lot-Sizing Technique I: The Part-Period
-/// Algorithm", IBM Systems Journal 7(1), 30-38, 1968.
-/// The PPS/PPB distinction is summarized by Baciarello et al. (2013),
-/// DOI 10.5772/56004.
+/// Reference: S. W. Chiu, C.-K. Ting and Y. P. Chiu,
+/// "A modified version of the part period lot-sizing heuristic",
+/// International Journal for Engineering Modelling 18(1-2), 59-64, 2005.
 /// </para>
 /// </remarks>
-public sealed class PartPeriodBalancingSolver : IUlsSolver
+public sealed class ChiuTingModifiedPartPeriodBalancingSolver : IUlsSolver
 {
-    public string Name => "Part-Period Balancing";
+    public string Name => "Chiu-Ting modified Part-Period Balancing";
 
     public UlsSolverKind Kind => UlsSolverKind.Heuristic;
 
     public static bool IsApplicable(UlsProblem problem) =>
         ClassicHeuristicGuard.HasStationaryRelevantCosts(problem);
-
-    public static double GetEconomicPartPeriod(UlsProblem problem)
-    {
-        ArgumentNullException.ThrowIfNull(problem);
-        ClassicHeuristicGuard.ThrowIfNotStationary(
-            problem,
-            "Part-Period Balancing");
-
-        var holdingCost =
-            problem.Horizon > 1 ? problem.HoldingCosts[0] : 0.0;
-
-        return holdingCost == 0.0
-            ? double.PositiveInfinity
-            : problem.SetupCosts[0] / holdingCost;
-    }
 
     public UlsSolveResult Solve(
         UlsProblem problem,
@@ -69,14 +50,19 @@ public sealed class PartPeriodBalancingSolver : IUlsSolver
 
             var demands = problem.Demands;
             var holdingCost =
-                horizon > 1 ? problem.HoldingCosts[0] : 0.0;
+                horizon > 1
+                    ? problem.HoldingCosts[0]
+                    : 0.0;
 
-            var epp = holdingCost == 0.0
-                ? double.PositiveInfinity
-                : problem.SetupCosts[0] / holdingCost;
+            var epp =
+                holdingCost == 0.0
+                    ? double.PositiveInfinity
+                    : problem.SetupCosts[0] / holdingCost;
 
             var start =
-                ClassicHeuristicGuard.FindNextPositiveDemand(demands, 0);
+                ClassicHeuristicGuard.FindNextPositiveDemand(
+                    demands,
+                    0);
 
             while (start < horizon)
             {
@@ -98,6 +84,12 @@ public sealed class PartPeriodBalancingSolver : IUlsSolver
                         (end - start) *
                         demands[end];
 
+                    if (!double.IsFinite(partPeriods))
+                    {
+                        throw new ArithmeticException(
+                            "Numerical overflow while evaluating modified PPB.");
+                    }
+
                     var difference =
                         Math.Abs(epp - partPeriods);
 
@@ -117,10 +109,17 @@ public sealed class PartPeriodBalancingSolver : IUlsSolver
 
                 cycleEnds[start] = bestEnd;
 
-                start = ClassicHeuristicGuard.FindNextPositiveDemand(
-                    demands,
-                    bestEnd + 1);
+                start =
+                    ClassicHeuristicGuard.FindNextPositiveDemand(
+                        demands,
+                        bestEnd + 1);
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            LastReplenishmentMergeImprover.TryMergeLastLot(
+                problem,
+                cycleEnds);
 
             return HeuristicSolutionBuilder.Build(
                 problem,
@@ -130,7 +129,9 @@ public sealed class PartPeriodBalancingSolver : IUlsSolver
         }
         finally
         {
-            ArrayPool<int>.Shared.Return(buffer, clearArray: false);
+            ArrayPool<int>.Shared.Return(
+                buffer,
+                clearArray: false);
         }
     }
 }

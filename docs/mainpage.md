@@ -19,6 +19,7 @@ This API site is the technical reference generated directly from the C# source a
 - @subpage exact_algorithms
 - @subpage heuristics
 - @subpage complexity_applicability
+- @subpage literature_heuristics_v022
 
 ## Solver-backed methods
 

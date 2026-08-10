@@ -399,6 +399,54 @@
       "publication": "Wemmerlöv (1983)",
       "doi": "10.1016/0272-6963(83)90023-2",
       "implementation": "Corrected PPB + LALB"
+    },
+    {
+      "name": "Part-Period Simplified",
+      "class": "PartPeriodSimplifiedSolver",
+      "family": "Part-period",
+      "time": "O(T)",
+      "space": "O(T)",
+      "applicability": "Stationary setup, production and relevant holding costs",
+      "sourcePath": "src/ULSAlgorithms/Heuristics/PartPeriodSimplifiedSolver.cs",
+      "publication": "DeMatteis (1968); Baciarello et al. (2013)",
+      "doi": "10.5772/56004",
+      "implementation": "No-overshoot EPP / Part-Period Simplified rule"
+    },
+    {
+      "name": "Segerstedt reformulated Silver-Meal",
+      "class": "SegerstedtReformulatedSilverMealSolver",
+      "family": "Average-cost",
+      "time": "O(T)",
+      "space": "O(T)",
+      "applicability": "Stationary setup, production and relevant holding costs",
+      "sourcePath": "src/ULSAlgorithms/Heuristics/SegerstedtReformulatedSilverMealSolver.cs",
+      "publication": "Segerstedt, Abdul-Jalbar & Samuelsson (2023)",
+      "doi": "10.3390/axioms12070661",
+      "implementation": "Reformulated Silver-Meal over non-zero demand events"
+    },
+    {
+      "name": "Chiu modified Least Unit Cost",
+      "class": "ChiuModifiedLeastUnitCostSolver",
+      "family": "Average-cost / post-processing",
+      "time": "O(T)",
+      "space": "O(T)",
+      "applicability": "Stationary setup, production and relevant holding costs",
+      "sourcePath": "src/ULSAlgorithms/Heuristics/ChiuModifiedLeastUnitCostSolver.cs",
+      "publication": "Chiu (2004)",
+      "doi": "10.1080/09720510.2004.10701115",
+      "implementation": "Classical LUC plus cost-beneficial final-lot merge"
+    },
+    {
+      "name": "Chiu-Ting modified Part-Period Balancing",
+      "class": "ChiuTingModifiedPartPeriodBalancingSolver",
+      "family": "Part-period / post-processing",
+      "time": "O(T)",
+      "space": "O(T)",
+      "applicability": "Stationary setup, production and relevant holding costs",
+      "sourcePath": "src/ULSAlgorithms/Heuristics/ChiuTingModifiedPartPeriodBalancingSolver.cs",
+      "publication": "Chiu, Ting & Chiu (2005)",
+      "doi": "",
+      "implementation": "Nearest-EPP PPB plus cost-beneficial final-lot merge"
     }
   ]
 }
