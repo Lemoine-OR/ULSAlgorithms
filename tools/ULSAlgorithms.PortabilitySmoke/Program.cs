@@ -27,13 +27,15 @@ var result =
         .CreateSolver()
         .Solve(problem);
 
+var objectiveValue = result.ObjectiveValue;
+
 if (result.Solution is null ||
-    !double.IsFinite(
-        result.ObjectiveValue))
+    !objectiveValue.HasValue ||
+    !double.IsFinite(objectiveValue.Value))
 {
     throw new InvalidOperationException(
         "Portable adaptive exact smoke solve did not produce a finite solution.");
 }
 
 Console.WriteLine(
-    $"ULSAlgorithms portability smoke passed. Objective = {result.ObjectiveValue:R}");
+    $"ULSAlgorithms portability smoke passed. Objective = {objectiveValue.Value:R}");
