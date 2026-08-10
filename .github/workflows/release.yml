@@ -13,8 +13,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  portability:
-    name: Linux pre-release portability smoke
+  linux-validation:
+    name: Linux pre-release full build, test and portability smoke
     runs-on: ubuntu-latest
 
     steps:
@@ -28,10 +28,15 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Build every .NET project and run all tests
+        shell: pwsh
+        run: |
+          ./build/Build-All.ps1
+
       - name: Run portable adaptive exact smoke
         shell: pwsh
         run: |
-          dotnet run --configuration Release --project tools/ULSAlgorithms.PortabilitySmoke/ULSAlgorithms.PortabilitySmoke.csproj
+          dotnet run --configuration Release --no-build --project tools/ULSAlgorithms.PortabilitySmoke/ULSAlgorithms.PortabilitySmoke.csproj
 
   cbc-integration:
     name: Linux pre-release CBC end-to-end qualification
@@ -66,7 +71,7 @@ jobs:
   release:
     name: Build, validate and publish release
     needs:
-      - portability
+      - linux-validation
       - cbc-integration
     runs-on: windows-latest
     timeout-minutes: 45
@@ -237,6 +242,8 @@ jobs:
             validated before publication.
           - Public API compatibility and runtime/documentation catalog
             consistency were validated before publication.
+          - Every repository .NET project was built explicitly on Windows and
+            Linux, and the complete unit-test suite passed on both platforms.
           - Linux portability and real COIN-OR CBC end-to-end qualification
             were validated before publication.
           "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8

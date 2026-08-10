@@ -9,10 +9,17 @@ The project follows Semantic Versioning from the 1.0.0 release onward.
 ### Added
 - Real COIN-OR CBC end-to-end qualification for all six public solver-backed ULS strategies.
 - Linux CI and pre-release qualification install the Ubuntu `coinor-cbc` package and force explicit CBC execution without fallback.
+- Repository-wide `.csproj` discovery so build validation cannot silently omit tool, smoke, benchmark, test or library projects.
+
+### Changed
+- `Build-All.ps1` now restores and compiles every discovered `.NET` project explicitly in Release configuration, in addition to the primary solution build.
+- Linux validation now performs the full repository build and complete unit-test suite before running the portability smoke.
+- The release workflow requires the same full Linux validation before the Windows publication job may start.
 
 ### Validation
 - The CBC qualification compares all four mathematical formulations and both `(l,S)` cutting-plane strategies against the self-contained `adaptive-exact` oracle on a deterministic instance with known objective 680.
 - The qualification verifies `Optimal` status, finite objective agreement, a reconstructed ULS solution, and recorded CBC provenance.
+- Every current repository `.csproj` is part of the build gate, including `PublicApiExporter`, `PortabilitySmoke` and `CbcIntegrationSmoke`, even when a project is not listed in `ULSAlgorithms.sln`.
 
 ## [0.28.0] - 2026-08-10
 

@@ -23,6 +23,10 @@ $required = @(
     'docs/algorithm-catalog.json',
     'docs/build-documentation.ps1',
     'eng/public-api/ULSAlgorithms.PublicApi.txt',
+    'src/ULSAlgorithms/ULSAlgorithms.csproj',
+    'tests/ULSAlgorithms.Tests/ULSAlgorithms.Tests.csproj',
+    'benchmarks/ULSAlgorithms.Benchmarks/ULSAlgorithms.Benchmarks.csproj',
+    'tools/Get-DotNetProjects.ps1',
     'tools/Install-Doxygen.ps1',
     'tools/Get-ULSAlgorithmsVersion.ps1',
     'tools/Test-DocumentationGeneratorHardening.ps1',
@@ -60,6 +64,27 @@ if ($null -eq $target) {
 }
 else {
     Write-Host "Build target detected: $($target.Path)"
+
+    $projects = @(
+        & (Join-Path $PSScriptRoot 'Get-DotNetProjects.ps1')
+    )
+
+    if ($projects.Count -eq 0) {
+        throw 'A build target exists, but the repository-wide project discovery returned no .csproj files.'
+    }
+
+    Write-Host "Repository-wide .NET project discovery: $($projects.Count) project(s)."
+
+    foreach ($project in $projects) {
+        $relativeProject =
+            $project.FullName.Substring($root.Length).
+                TrimStart(
+                    [System.IO.Path]::DirectorySeparatorChar,
+                    [System.IO.Path]::AltDirectorySeparatorChar)
+
+        Write-Host "  - $relativeProject"
+    }
+
     $version = & (Join-Path $PSScriptRoot 'Get-ULSAlgorithmsVersion.ps1')
     Write-Host "NBGV package version: $($version.PackageVersion)"
 
