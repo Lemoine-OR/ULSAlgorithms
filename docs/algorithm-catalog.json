@@ -53,7 +53,7 @@
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Exact/WagnerWhitin/WagnerWhitinEvansSolver.cs",
       "publication": "Evans (1985)",
-      "doi": "",
+      "doi": "10.1016/0272-6963(85)90009-9",
       "implementation": "Low-storage forward DP"
     },
     {
@@ -233,7 +233,7 @@
       "category": "direct-exact",
       "kind": "exact",
       "family": "Parallel DP",
-      "time": "O(T²/p) candidate work",
+      "time": "O(T²) work; O(T²/p) ideal parallel candidate span",
       "space": "O(T)",
       "applicability": "General ULS costs",
       "requiresExternalSolver": false,
@@ -479,7 +479,7 @@
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Heuristics/PartPeriodBalancingSolver.cs",
       "publication": "DeMatteis (1968)",
-      "doi": "",
+      "doi": "10.1147/sj.71.0030",
       "implementation": "Closest balance to economic part period"
     },
     {

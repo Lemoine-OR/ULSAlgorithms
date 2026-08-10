@@ -10,16 +10,20 @@ The project follows Semantic Versioning from the 1.0.0 release onward.
 - Real COIN-OR CBC end-to-end qualification for all six public solver-backed ULS strategies.
 - Linux CI and pre-release qualification install the Ubuntu `coinor-cbc` package and force explicit CBC execution without fallback.
 - Repository-wide `.csproj` discovery so build validation cannot silently omit tool, smoke, benchmark, test or library projects.
+- Audited scientific-provenance baseline covering all 42 public strategy IDs.
 
 ### Changed
 - `Build-All.ps1` now restores and compiles every discovered `.NET` project explicitly in Release configuration, in addition to the primary solution build.
 - Linux validation now performs the full repository build and complete unit-test suite before running the portability smoke.
 - The release workflow requires the same full Linux validation before the Windows publication job may start.
+- Scientific metadata now records the published Evans (1985) DOI and the DeMatteis (1968) DOI used by Part-Period Balancing.
+- Lyu-Lee complexity metadata now distinguishes `O(T²)` total implementation work from the ideal `O(T²/p)` parallel candidate-evaluation span.
 
 ### Validation
 - The CBC qualification compares all four mathematical formulations and both `(l,S)` cutting-plane strategies against the self-contained `adaptive-exact` oracle on a deterministic instance with known objective 680.
 - The qualification verifies `Optimal` status, finite objective agreement, a reconstructed ULS solution, and recorded CBC provenance.
 - Every current repository `.csproj` is part of the build gate, including `PublicApiExporter`, `PortabilitySmoke` and `CbcIntegrationSmoke`, even when a project is not listed in `ULSAlgorithms.sln`.
+- Scientific metadata tests now lock reference, DOI, complexity, applicability and implementation characterization for every public strategy before the 1.0 compatibility freeze.
 
 ## [0.28.0] - 2026-08-10
 

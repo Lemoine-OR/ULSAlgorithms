@@ -37,11 +37,13 @@ namespace ULSAlgorithms.Exact.Parallel;
 /// DOI: 10.1016/S0360-8352(01)00047-X.
 /// </para>
 /// <para>
-/// The accessible publisher metadata describes the parallel algorithm and its
-/// O(n^2/p) processor-time objective but not the full source listing. This
-/// class is therefore documented as a modern shared-memory realization of the
-/// paper's lower-triangular parallel DP architecture, not as a transliteration
-/// of the authors' original PVM implementation.
+/// The original paper describes a distributed parallel implementation and
+/// reports near-linear empirical speedup. The asymptotic statement used by
+/// this library is deliberately implementation-specific: this C# reconstruction
+/// performs O(T^2) total predecessor work and has ideal O(T^2/p) candidate
+/// evaluation span with p effective workers, plus scheduling/reduction overhead.
+/// It is a modern shared-memory realization, not a transliteration of the
+/// authors' original PVM implementation.
 /// </para>
 /// </remarks>
 public sealed class LyuLeeParallelSolver : IUlsSolver
