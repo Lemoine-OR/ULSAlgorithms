@@ -13,6 +13,17 @@ Solver-backed ULS methods must not hard-code one mathematical optimizer.
 3. **FICO Xpress**
 4. **COIN-OR CBC**
 
+Starting with v0.16.0, the four concrete discovery adapters are included in the
+main package and can be used without manually constructing a registry:
+
+```csharp
+SolverSelectionResult selection =
+    await OptimizationSolverDiscovery.SelectAsync(
+        SolverKind.Automatic,
+        options,
+        cancellationToken);
+```
+
 The first adapter that both:
 
 - supports all capabilities required by the algorithm; and
@@ -23,26 +34,25 @@ is selected.
 A solver that is installed but cannot load its libraries, lacks a usable
 license, or does not expose a required capability is skipped with a diagnostic.
 
+## Complete discovery
+
+To inspect the complete machine state:
+
+```csharp
+SolverDiscoveryReport report =
+    await OptimizationSolverDiscovery.DiscoverAllAsync(
+        cancellationToken);
+```
+
+The report always follows the standard CPLEX → Gurobi → Xpress → CBC order and
+contains both usable and unavailable solver diagnostics.
+
 ## Explicit solver selection
 
 A caller may request a concrete solver. With
 `SolverSelectionOptions.RequireExactSolverKind = true`, failure of that solver
 does not trigger fallback. With the default `false`, the requested solver is
 tried first, followed by the standard priority.
-
-## Adapter responsibility
-
-Concrete adapters perform the real machine check:
-
-- installation discovery;
-- managed/native library validation;
-- load smoke test;
-- license validation where relevant;
-- solver-version reporting;
-- capability reporting.
-
-The generic selection layer does not infer usability from an installation
-folder alone.
 
 ## Reproducibility
 

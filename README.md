@@ -35,7 +35,7 @@ The current algorithm catalog contains:
 - **11 heuristics**;
 - **27 public solving strategies** sharing `IUlsSolver`.
 
-The infrastructure also defines a common architecture for future **solver-backed formulations and cutting-plane methods**, including automatic optimization-solver selection and complete cut-generation traceability.
+Solver-backed infrastructure includes four concrete optional machine-discovery adapters and complete cutting-plane traceability.
 
 Developed and maintained by **David Lemoine — Lemoine-OR**.
 
@@ -54,7 +54,7 @@ With `SolverKind.Automatic`, the default priority is:
 
 This order intentionally matches LotSizingDataModel.
 
-Selection is based on **real adapter availability and required capabilities**. An installed solver that cannot load, has no usable license, or lacks a required capability is skipped with diagnostics.
+Starting with v0.16.0, all four concrete discovery adapters are built into ULSAlgorithms. Selection is based on **real adapter availability and required capabilities**. An installed solver that cannot load, has no usable license, or lacks a required capability is skipped with diagnostics.
 
 The caller may still explicitly request a concrete solver and may disable fallback.
 
@@ -85,6 +85,7 @@ The public portal is the recommended entry point:
 In addition to algorithm documentation, see:
 
 - **Optimization Solver Integration**
+- **Concrete Solver Adapters**
 - **Cut Generation Traceability**
 - **Validation & Benchmarks**
 - **Scientific References**
@@ -122,21 +123,30 @@ UlsSolveResult Solve(
 
 ## Automatic optimization-solver selection
 
-Solver-backed methods use the shared optimization layer:
+Solver-backed methods do not need to construct an adapter registry:
 
 ```csharp
 var options = new SolverSelectionOptions();
 options.RequiredCapabilities.Add(
     SolverCapability.MixedIntegerLinearProgramming);
 
-var selection = await new SolverSelectionService().SelectAsync(
-    SolverKind.Automatic,
-    registry,
-    options,
-    cancellationToken);
+SolverSelectionResult selection =
+    await OptimizationSolverDiscovery.SelectAsync(
+        SolverKind.Automatic,
+        options,
+        cancellationToken);
+
+Console.WriteLine(selection.SelectedSolver);
+Console.WriteLine(selection.Availability?.SolverVersion);
 ```
 
-Concrete provider adapters perform the real machine / native-library / license check.
+To inspect every solver found on the machine:
+
+```csharp
+SolverDiscoveryReport report =
+    await OptimizationSolverDiscovery.DiscoverAllAsync(
+        cancellationToken);
+```
 
 ## Algorithm families
 
@@ -161,7 +171,9 @@ ULSAlgorithms/
 │   ├── Results/           solution and solve-status model
 │   ├── Exact/             exact algorithms by family
 │   ├── Heuristics/        heuristic strategies
-│   ├── Optimization/      external-solver selection and provenance
+│   ├── Optimization/
+│   │   ├── Adapters/      CPLEX / Gurobi / Xpress / CBC discovery
+│   │   └── External/      optional process/runtime probing
 │   └── CuttingPlanes/     solver-independent cut traceability
 ├── tests/                 xUnit validation and cross-checks
 ├── benchmarks/            BenchmarkDotNet suites
@@ -179,8 +191,8 @@ independent exact oracles, cross-validation, cancellation tests, applicability
 tests and BenchmarkDotNet measurements.
 
 Solver-backed infrastructure is tested separately for deterministic selection
-order, capability filtering, fallback behavior and complete generated/added cut
-accounting.
+order, capability filtering, fallback behavior, concrete adapter registration,
+machine-discovery metadata and complete generated/added cut accounting.
 
 Heuristics return **`Feasible`**, never `Optimal`. Exact methods return
 **`Optimal`** only after completing an exact algorithm.
@@ -195,6 +207,9 @@ Requirements:
 ```powershell
 powershell -ExecutionPolicy Bypass -File ".\build\Build-Validated.ps1"
 ```
+
+The main project has no compile-time dependency on CPLEX, Gurobi, Xpress or CBC.
+Provider runtimes are detected only when solver discovery is requested.
 
 For documentation:
 
