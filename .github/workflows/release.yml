@@ -237,9 +237,9 @@ jobs:
           - Commit: $env:RELEASE_COMMIT
           - Prerelease: $env:RELEASE_PRERELEASE
 
-          - Binary ZIP, documentation ZIP, NuGet package, build metadata,
-            binary manifest, release manifest and SHA-256 checksums were
-            validated before publication.
+          - Binary ZIP, documentation ZIP, NuGet package, NuGet portable-symbol
+            package, build metadata, binary manifest, release manifest and
+            SHA-256 checksums were validated before publication.
           - Public API compatibility and runtime/documentation catalog
             consistency were validated before publication.
           - Every repository .NET project was built explicitly on Windows and

@@ -11,6 +11,27 @@ available in one place.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-08-11
+
+### Stability
+- Establishes the first stable public API contract for ULSAlgorithms.
+- Freezes the public .NET API baseline, existing stable solver IDs and `UlsSolverConfiguration` schema version 1 as the minimum compatibility contract for the 1.x line.
+- Retains the complete 42-strategy catalog: 17 direct exact algorithms, 4 mathematical formulations, 2 `(l,S)` cutting-plane methods and 19 heuristics.
+- Retains the validated solver-backed execution architecture for CPLEX, Gurobi, Xpress and COIN-OR CBC.
+- Introduces no new algorithm, formulation, heuristic, numerical policy or public API member relative to v0.29.0.
+
+### Validation
+- Reuses the complete v0.29.0 qualification gate unchanged: repository-wide Release builds on Windows and Linux, 272 unit tests, Linux portability smoke and real CBC end-to-end qualification of all six solver-backed strategies.
+- Requires runtime/documentation catalog synchronization and public API compatibility validation before publication.
+- Requires official .NET package validation, isolated real NuGet consumer restore/build/run validation, `.nupkg` validation and portable-symbol `.snupkg` validation.
+- Requires validated binary/documentation archives, release manifests and SHA-256 sidecars before publication.
+
+### Compatibility
+- Existing public .NET types and members form the stable 1.x compatibility baseline.
+- Existing public solver IDs are stable compatibility identifiers.
+- Serialized configuration schema version 1 is stable.
+- Future compatible additions may ship in minor releases; intentional incompatible changes require a new major version.
+
 ## [0.29.0] - 2026-08-11
 
 ### Added

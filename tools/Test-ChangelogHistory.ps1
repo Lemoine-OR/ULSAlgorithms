@@ -18,6 +18,15 @@ if ($text -match '(?m)^## Earlier 0\.x releases\s*$') {
     throw 'CHANGELOG.md must not collapse historical 0.x releases into a generic summary.'
 }
 
+$stableMatches =
+    [regex]::Matches(
+        $text,
+        '(?m)^## \[1\.0\.0\]\s+-\s+2026-08-11\s*$')
+
+if ($stableMatches.Count -ne 1) {
+    throw "Expected exactly one release-ready v1.0.0 changelog heading, found $($stableMatches.Count)."
+}
+
 $expected =
     29..1 |
     ForEach-Object { "0.$_.0" }
@@ -55,8 +64,11 @@ foreach ($version in $expected) {
     }
 }
 
-if ($text -notmatch '(?m)^## \[0\.29\.0\]\s+-\s+2026-08-11\s*$') {
-    throw 'The release-ready v0.29.0 changelog heading is missing or has the wrong date.'
+$stableIndex = $text.IndexOf('## [1.0.0] - 2026-08-11')
+$v029Index = $text.IndexOf('## [0.29.0] - 2026-08-11')
+
+if ($stableIndex -lt 0 -or $v029Index -lt 0 -or $stableIndex -gt $v029Index) {
+    throw 'The v1.0.0 entry must appear before v0.29.0.'
 }
 
-Write-Host 'Changelog history validation passed: explicit entries 0.1.0 through 0.29.0 are complete and ordered.'
+Write-Host 'Changelog history validation passed: v1.0.0 is release-ready and explicit entries 0.1.0 through 0.29.0 remain complete and ordered.'

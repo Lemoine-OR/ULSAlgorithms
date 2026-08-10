@@ -95,7 +95,7 @@ are rejected rather than silently ignored.
 
 ## Reproducible JSON configuration
 
-v0.28.0 adds a versioned serializable configuration:
+The library provides a versioned serializable configuration:
 
 ```csharp
 var configuration =
@@ -207,8 +207,8 @@ The citation metadata is also included in the NuGet package.
 ## API stability
 
 The compatibility policy is documented in
-[`API-STABILITY.md`](API-STABILITY.md). Version 1.0.0 will make the validated
-public API baseline the stable 1.x contract.
+[`API-STABILITY.md`](API-STABILITY.md). Version 1.0.0 establishes the validated public API baseline as the stable
+1.x compatibility contract.
 
 ## License
 

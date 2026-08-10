@@ -2,7 +2,7 @@
 
 ## Scope
 
-ULSAlgorithms 1.0.0 marks the beginning of the stable public API.
+ULSAlgorithms 1.0.0 establishes the first stable public API.
 
 The compatibility contract covers:
 
@@ -11,9 +11,16 @@ The compatibility contract covers:
 - the stable solver identifiers published by `UlsSolverCatalog`;
 - public configuration schema version 1 for `UlsSolverConfiguration`.
 
-## Semantic versioning after 1.0.0
+The v1.0.0 release freezes the entries already present in
+`eng/public-api/ULSAlgorithms.PublicApi.txt` and the stable solver IDs already
+published by the runtime catalog as the minimum compatibility baseline for the
+1.x line. Compatible additions are allowed; removal or incompatible replacement
+of an existing baseline contract is not.
+
+## Semantic versioning from 1.0.0
 
 ### Major version
+
 A major version is required for an intentional incompatible change, including:
 
 - removing or renaming a public type or member;
@@ -25,6 +32,7 @@ A major version is required for an intentional incompatible change, including:
   path.
 
 ### Minor version
+
 A minor version may add compatible functionality, including:
 
 - new public algorithms and new stable solver IDs;
@@ -34,6 +42,7 @@ A minor version may add compatible functionality, including:
 - new documentation and diagnostics.
 
 ### Patch version
+
 A patch version contains compatible corrections, numerical fixes, performance
 improvements, documentation corrections and release-engineering changes.
 
@@ -56,6 +65,12 @@ Update the baseline only for an intentional compatibility decision:
 A baseline update must be reviewed as an API change, not as routine generated
 output.
 
+The product package also enables the official .NET package validator during
+`dotnet pack`. `PackageValidationBaselineVersion` is intentionally not set in
+v1.0.0 itself: v1.0.0 can become the official package baseline for later 1.x
+releases once that package is available from the NuGet feed selected for
+baseline resolution.
+
 ## Serialized configuration compatibility
 
 `UlsSolverConfiguration.SchemaVersion` is independent from the package version.
@@ -69,3 +84,7 @@ added to a schema only when older configurations keep the same behavior.
 Stable IDs are intended for source code, configuration files, experiment
 descriptions and reproducibility artifacts. An ID is therefore part of the
 compatibility contract once published.
+
+New solver IDs may be added compatibly in a minor release. An existing stable
+ID may not be removed, renamed or silently reassigned to a different scientific
+strategy within the 1.x line.
