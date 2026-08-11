@@ -11,6 +11,18 @@ available in one place.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-08-11
+
+### Changed
+- Restored the GitHub repository README as a visual project landing page while preserving the stable v1.0 public API and implementation.
+- Restored the ULSAlgorithms logo, build/documentation/release badges, quick project links and the four-family visual overview.
+- Restored clickable method panels and updated them to the complete v1.0 catalog of 42 public strategies.
+- Added stable solver IDs directly to the GitHub method panels so catalog/factory usage is visible from the repository home page.
+- Kept the v1.0 factory, serializable configuration, external-solver, validation, distribution, citation and API-stability information on the landing page.
+
+### Compatibility
+- Documentation-only patch: no algorithm, public .NET API member, stable solver ID, numerical policy, optimization adapter or serialized configuration contract is changed.
+- The stable v1.0 compatibility baseline remains unchanged.
 ## [1.0.0] - 2026-08-11
 
 ### Stability
