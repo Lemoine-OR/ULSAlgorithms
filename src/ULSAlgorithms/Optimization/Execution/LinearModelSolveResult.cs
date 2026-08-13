@@ -1,4 +1,4 @@
-namespace ULSAlgorithms.Optimization.Execution;
+﻿namespace ULSAlgorithms.Optimization.Execution;
 
 /// <summary>
 /// Result of executing a solver-independent linear or mixed-integer model.
@@ -22,6 +22,7 @@ public sealed class LinearModelSolveResult
     {
         ModelName = modelName ?? string.Empty;
         Status = status;
+        SolverReportedStatus = status;
         Solver = solver;
         _variableValues =
             variableValues is null
@@ -39,8 +40,14 @@ public sealed class LinearModelSolveResult
     /// <summary>Gets the submitted model name.</summary>
     public string ModelName { get; }
 
-    /// <summary>Gets the normalized solve status.</summary>
+    /// <summary>Gets the normalized solve status after independent validation.</summary>
     public LinearModelSolveStatus Status { get; }
+
+    /// <summary>
+    /// Gets the status reported by the optimization engine before independent
+    /// portable-model validation can downgrade a rejected candidate.
+    /// </summary>
+    public LinearModelSolveStatus SolverReportedStatus { get; internal init; }
 
     /// <summary>Gets selected-solver provenance, when a solver was selected.</summary>
     public SolverExecutionInfo? Solver { get; }
@@ -78,3 +85,4 @@ public sealed class LinearModelSolveResult
             LinearModelSolveStatus.Optimal or
             LinearModelSolveStatus.Feasible;
 }
+

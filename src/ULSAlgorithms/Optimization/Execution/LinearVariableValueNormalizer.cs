@@ -1,4 +1,4 @@
-using ULSAlgorithms.Optimization.Modeling;
+﻿using ULSAlgorithms.Optimization.Modeling;
 
 namespace ULSAlgorithms.Optimization.Execution;
 
@@ -34,7 +34,7 @@ public sealed class LinearVariableValueNormalizer
     /// Default absolute tolerance used for integer-domain variables.
     /// </summary>
     public const double DefaultIntegralityTolerance =
-        1.0e-7;
+        1.0e-5;
 
     /// <summary>
     /// Default absolute tolerance used to clean continuous values that are
@@ -136,8 +136,12 @@ public sealed class LinearVariableValueNormalizer
     private double NormalizeBinary(
         double rawValue)
     {
+        // A binary value is solver-reported floating-point data.  Normalize
+        // symmetrically around both admissible integer values using the
+        // configured integrality tolerance.  The normalized solution is then
+        // independently checked against every model constraint.
         if (Math.Abs(rawValue) <=
-            ZeroTolerance)
+            IntegralityTolerance)
         {
             return 0.0;
         }
@@ -154,7 +158,6 @@ public sealed class LinearVariableValueNormalizer
             $"the configured integrality tolerance " +
             $"'{IntegralityTolerance:G17}' of 0 or 1.");
     }
-
     private double NormalizeInteger(
         double rawValue)
     {
@@ -201,3 +204,4 @@ public sealed class LinearVariableValueNormalizer
         }
     }
 }
+

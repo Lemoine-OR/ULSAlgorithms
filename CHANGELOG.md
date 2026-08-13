@@ -1,3 +1,18 @@
+﻿## 1.1.0
+
+### Reproducible computational study release
+
+- Added execution provenance to `AdaptiveExactUlsSolver` through
+  `AdaptiveExactUlsSolveResult`, exposing the exact strategy selected at runtime.
+- Hardened solver-backed numerical execution, including CPLEX status mapping,
+  variable-value normalization and fixed-integer polishing.
+- Added regression coverage for CPLEX status interpretation, numerical
+  normalization and fixed-integer polishing.
+- Audited and corrected scientific metadata used by the public solver catalog.
+- Validated the complete library with 288 passing tests.
+- Aligned this release with the companion reproducible computational study of
+  42 public ULS strategies on 600 benchmark instances.
+
 # Changelog
 
 All notable changes to ULSAlgorithms are documented in this file.
@@ -356,3 +371,4 @@ available in one place.
 - Shared build metadata and Nerdbank.GitVersioning configuration.
 - Validated build, documentation and GitHub release automation.
 - Reproducible binary/documentation release assets with manifests and SHA-256 checksums.
+

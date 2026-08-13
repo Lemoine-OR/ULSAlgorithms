@@ -1,8 +1,9 @@
-using ULSAlgorithms.Abstractions;
+﻿using ULSAlgorithms.Abstractions;
 using ULSAlgorithms.Exact.Formulations.Internal;
 using ULSAlgorithms.Formulations;
 using ULSAlgorithms.Models;
 using ULSAlgorithms.Optimization.Execution;
+using ULSAlgorithms.Optimization.Modeling;
 using ULSAlgorithms.Results;
 using ULSAlgorithms.Validation;
 
@@ -123,6 +124,14 @@ public abstract class SolverBackedUlsFormulationSolverBase :
                 cancellationToken)
             .ConfigureAwait(false);
 
+        execution =
+            await TryRecoverRejectedCandidateAsync(
+                formulation.Model,
+                execution,
+                options,
+                cancellationToken)
+            .ConfigureAwait(false);
+
         if (!execution.HasFeasibleSolution)
         {
             return new SolverBackedUlsSolveResult(
@@ -217,6 +226,266 @@ public abstract class SolverBackedUlsFormulationSolverBase :
         }
     }
 
+    private async ValueTask<LinearModelSolveResult>
+        TryRecoverRejectedCandidateAsync(
+            LinearModel originalModel,
+            LinearModelSolveResult execution,
+            LinearModelSolveOptions options,
+            CancellationToken cancellationToken)
+    {
+        if (!options.EnableFixedIntegerPolishing ||
+            !ShouldAttemptFixedIntegerPolishing(
+                originalModel,
+                execution,
+                options))
+        {
+            return execution;
+        }
+
+        LinearModel fixedIntegerModel;
+
+        try
+        {
+            fixedIntegerModel =
+                BuildFixedIntegerPolishingModel(
+                    originalModel,
+                    execution.VariableValues,
+                    options.IntegralityTolerance);
+        }
+        catch (Exception exception)
+            when (exception is not OperationCanceledException)
+        {
+            return AppendDiagnostic(
+                execution,
+                "Fixed-integer polishing could not build the recovery model: " +
+                exception.Message);
+        }
+
+        LinearModelSolveOptions polishOptions =
+            CloneOptions(options);
+
+        // Never overwrite an explicitly requested export of the original MIP.
+        polishOptions.ExportModelPath =
+            string.Empty;
+
+        LinearModelSolveResult polished;
+
+        try
+        {
+            polished =
+                await _modelSolver.SolveAsync(
+                    fixedIntegerModel,
+                    polishOptions,
+                    cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            return AppendDiagnostic(
+                execution,
+                "Fixed-integer polishing failed during continuous re-optimization: " +
+                exception.Message);
+        }
+
+        if (!polished.HasFeasibleSolution)
+        {
+            return AppendDiagnostic(
+                execution,
+                "Fixed-integer polishing did not recover an independently " +
+                $"feasible solution (status {polished.Status}; native " +
+                $"'{polished.NativeStatus}').");
+        }
+
+        LinearModelSolveStatus recoveredStatus =
+            execution.SolverReportedStatus ==
+            LinearModelSolveStatus.Optimal
+                ? LinearModelSolveStatus.Optimal
+                : LinearModelSolveStatus.Feasible;
+
+        var diagnostics =
+            execution.Diagnostics
+                .Concat(
+                    [
+                        "Fixed-integer polishing recovered the candidate by " +
+                        "fixing normalized integer decisions and re-optimizing " +
+                        "the remaining continuous model."
+                    ])
+                .Concat(polished.Diagnostics)
+                .ToArray();
+
+        string nativeStatus =
+            string.IsNullOrWhiteSpace(execution.NativeStatus)
+                ? "fixed-integer polish: " + polished.NativeStatus
+                : execution.NativeStatus +
+                  " | fixed-integer polish: " +
+                  polished.NativeStatus;
+
+        return new LinearModelSolveResult(
+            originalModel.Name,
+            recoveredStatus,
+            polished.Solver ??
+            execution.Solver,
+            polished.VariableValues,
+            polished.Validation,
+            execution.SolveDuration +
+            polished.SolveDuration,
+            nativeStatus,
+            diagnostics,
+            polished.ArtifactDirectory)
+        {
+            // Critical scientific rule: a CPXMIP_OPTIMAL_TOL incumbent stays
+            // non-proven even when its fixed-integer LP is polished optimally.
+            SolverReportedStatus =
+                execution.SolverReportedStatus
+        };
+    }
+
+    private static bool ShouldAttemptFixedIntegerPolishing(
+        LinearModel model,
+        LinearModelSolveResult execution,
+        LinearModelSolveOptions options)
+    {
+        if (!model.IsMixedInteger ||
+            execution.VariableValues.Count == 0 ||
+            execution.Validation is null ||
+            execution.Validation.IsFeasible ||
+            execution.SolverReportedStatus is not (
+                LinearModelSolveStatus.Optimal or
+                LinearModelSolveStatus.Feasible))
+        {
+            return false;
+        }
+
+        foreach (LinearVariable variable in model.Variables)
+        {
+            if (variable.Type == LinearVariableType.Continuous)
+            {
+                continue;
+            }
+
+            if (!execution.VariableValues.TryGetValue(
+                    variable.Id,
+                    out double value) ||
+                !double.IsFinite(value))
+            {
+                return false;
+            }
+
+            double rounded =
+                Math.Round(
+                    value,
+                    MidpointRounding.AwayFromZero);
+
+            if (Math.Abs(value - rounded) >
+                options.IntegralityTolerance)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static LinearModel BuildFixedIntegerPolishingModel(
+        LinearModel original,
+        IReadOnlyDictionary<int, double> candidateValues,
+        double integralityTolerance)
+    {
+        var variables =
+            new LinearVariable[original.VariableCount];
+
+        for (int index = 0;
+             index < original.VariableCount;
+             index++)
+        {
+            LinearVariable variable =
+                original.Variables[index];
+
+            if (variable.Type ==
+                LinearVariableType.Continuous)
+            {
+                variables[index] =
+                    variable;
+
+                continue;
+            }
+
+            if (!candidateValues.TryGetValue(
+                    variable.Id,
+                    out double candidate) ||
+                !double.IsFinite(candidate))
+            {
+                throw new InvalidOperationException(
+                    $"No finite candidate value exists for integer variable " +
+                    $"'{variable.Name}'.");
+            }
+
+            double fixedValue =
+                Math.Round(
+                    candidate,
+                    MidpointRounding.AwayFromZero);
+
+            if (Math.Abs(candidate - fixedValue) >
+                integralityTolerance)
+            {
+                throw new InvalidOperationException(
+                    $"Integer variable '{variable.Name}' is too fractional " +
+                    "for fixed-integer polishing.");
+            }
+
+            if (fixedValue <
+                    variable.LowerBound -
+                    integralityTolerance ||
+                fixedValue >
+                    variable.UpperBound +
+                    integralityTolerance)
+            {
+                throw new InvalidOperationException(
+                    $"Rounded integer value {fixedValue:G17} for " +
+                    $"'{variable.Name}' lies outside its original bounds.");
+            }
+
+            // Convert the fixed integer decision to a continuous fixed
+            // variable. The recovery solve is therefore an LP, not another MIP.
+            variables[index] =
+                new LinearVariable(
+                    variable.Id,
+                    variable.Name,
+                    LinearVariableType.Continuous,
+                    fixedValue,
+                    fixedValue);
+        }
+
+        return new LinearModel(
+            original.Name + "-FixedIntegerPolish",
+            variables,
+            original.Constraints,
+            original.Objective);
+    }
+
+    private static LinearModelSolveResult AppendDiagnostic(
+        LinearModelSolveResult execution,
+        string message)
+    {
+        return new LinearModelSolveResult(
+            execution.ModelName,
+            execution.Status,
+            execution.Solver,
+            execution.VariableValues,
+            execution.Validation,
+            execution.SolveDuration,
+            execution.NativeStatus,
+            execution.Diagnostics.Concat([message]),
+            execution.ArtifactDirectory)
+        {
+            SolverReportedStatus =
+                execution.SolverReportedStatus
+        };
+    }
     private static UlsSolveStatus MapStatusWithoutSolution(
         LinearModelSolveStatus status)
     {
@@ -314,6 +583,8 @@ public abstract class SolverBackedUlsFormulationSolverBase :
                 source.IntegralityTolerance,
             NearIntegerTolerance =
                 source.NearIntegerTolerance,
+            EnableFixedIntegerPolishing =
+                source.EnableFixedIntegerPolishing,
             ExportModelPath =
                 source.ExportModelPath,
             KeepTemporaryFiles =
@@ -323,3 +594,4 @@ public abstract class SolverBackedUlsFormulationSolverBase :
         };
     }
 }
+

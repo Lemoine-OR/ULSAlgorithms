@@ -1,4 +1,4 @@
-using ULSAlgorithms.Abstractions;
+﻿using ULSAlgorithms.Abstractions;
 using ULSAlgorithms.Exact.FedergruenTzur;
 using ULSAlgorithms.Exact.Wagelmans;
 using ULSAlgorithms.Exact.WagnerWhitin;
@@ -137,7 +137,48 @@ public sealed class AdaptiveExactUlsSolver : IUlsSolver
         ArgumentNullException.ThrowIfNull(problem);
         cancellationToken.ThrowIfCancellationRequested();
 
-        var selected = SelectSolver(problem);
-        return selected.Solve(problem, cancellationToken);
+        IUlsSolver selected =
+            SelectSolver(problem);
+
+        UlsSolveResult selectedResult =
+            selected.Solve(
+                problem,
+                cancellationToken);
+
+        string selectedAlgorithmId =
+            GetSelectedAlgorithmId(
+                selected);
+
+        return new AdaptiveExactUlsSolveResult(
+            Name,
+            selectedResult.Status,
+            selectedAlgorithmId,
+            selectedResult.SolverName,
+            selectedResult.Solution,
+            selectedResult.Message);
+    }
+
+    private string GetSelectedAlgorithmId(
+        IUlsSolver selected)
+    {
+        if (ReferenceEquals(
+                selected,
+                _linearSolver))
+        {
+            return "wagner-whitin-linear";
+        }
+
+        return Fallback switch
+        {
+            UlsGeneralExactFallback.WagelmansGeneral =>
+                "wagelmans-general",
+
+            UlsGeneralExactFallback.FedergruenTzurGeneral =>
+                "federgruen-tzur-general",
+
+            _ => throw new InvalidOperationException(
+                $"Unsupported adaptive exact fallback '{Fallback}'.")
+        };
     }
 }
+

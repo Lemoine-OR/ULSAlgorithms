@@ -1,4 +1,4 @@
-using ULSAlgorithms.Optimization.Modeling;
+﻿using ULSAlgorithms.Optimization.Modeling;
 
 namespace ULSAlgorithms.Optimization.Execution;
 
@@ -72,7 +72,9 @@ internal static class SolverExecutionUtilities
                     variable.Id,
                     out double value)
                     ? value
-                    : 0.0;
+                    : variable.LowerBound == variable.UpperBound
+                        ? variable.LowerBound
+                        : 0.0;
         }
 
         return completed;
@@ -158,7 +160,11 @@ internal static class SolverExecutionUtilities
             duration,
             nativeStatus,
             messages,
-            retainedDirectory);
+            retainedDirectory)
+        {
+            SolverReportedStatus =
+                proposedStatus
+        };
     }
 
 
@@ -232,3 +238,4 @@ internal static class SolverExecutionUtilities
             string.Empty;
     }
 }
+

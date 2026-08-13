@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using ULSAlgorithms.Optimization.Modeling;
 
 namespace ULSAlgorithms.Optimization.Execution.Providers;
@@ -243,37 +243,97 @@ public sealed class CplexLinearModelExecutor :
         bool solutionExists,
         int exitCode)
     {
-        string combined =
-            nativeStatus +
-            Environment.NewLine +
-            output;
+        // The status stored in the CPLEX XML solution is authoritative.
+        // Console logs can legitimately contain words such as "infeasible"
+        // while reporting presolve statistics, MIP starts, node information,
+        // or intermediate incumbents.  Searching the complete console output
+        // before the native status can therefore misclassify a valid solution.
+        if (!string.IsNullOrWhiteSpace(nativeStatus))
+        {
+            string native =
+                nativeStatus.Trim();
 
-        if (combined.Contains(
+            if (native.Contains(
+                    "infeasible or unbounded",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return LinearModelSolveStatus.InfeasibleOrUnbounded;
+            }
+
+            // CPXMIP_OPTIMAL_TOL / "integer optimal, tolerance":
+            // feasible incumbent accepted within MIP gap tolerances, but
+            // global optimality is not proved.
+            if (native.Contains(
+                    "optimal, tolerance",
+                    StringComparison.OrdinalIgnoreCase) ||
+                native.Contains(
+                    "optimal within tolerance",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return LinearModelSolveStatus.Feasible;
+            }
+
+            if (native.Contains(
+                    "optimal",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return LinearModelSolveStatus.Optimal;
+            }
+
+            if (native.Contains(
+                    "infeasible",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return LinearModelSolveStatus.Infeasible;
+            }
+
+            if (native.Contains(
+                    "unbounded",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return LinearModelSolveStatus.Unbounded;
+            }
+        }
+
+        // Fallback only when the XML/native status is absent or unrecognized.
+        if (output.Contains(
                 "infeasible or unbounded",
                 StringComparison.OrdinalIgnoreCase))
         {
             return LinearModelSolveStatus.InfeasibleOrUnbounded;
         }
 
-        if (combined.Contains(
+        if (output.Contains(
+                "optimal, tolerance",
+                StringComparison.OrdinalIgnoreCase) ||
+            output.Contains(
+                "optimal within tolerance",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return solutionExists
+                ? LinearModelSolveStatus.Feasible
+                : LinearModelSolveStatus.Unknown;
+        }
+
+        if (output.Contains(
+                "optimal",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return LinearModelSolveStatus.Optimal;
+        }
+
+        if (output.Contains(
                 "infeasible",
                 StringComparison.OrdinalIgnoreCase))
         {
             return LinearModelSolveStatus.Infeasible;
         }
 
-        if (combined.Contains(
+        if (output.Contains(
                 "unbounded",
                 StringComparison.OrdinalIgnoreCase))
         {
             return LinearModelSolveStatus.Unbounded;
-        }
-
-        if (combined.Contains(
-                "optimal",
-                StringComparison.OrdinalIgnoreCase))
-        {
-            return LinearModelSolveStatus.Optimal;
         }
 
         if (solutionExists)

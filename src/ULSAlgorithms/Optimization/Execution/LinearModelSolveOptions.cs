@@ -1,4 +1,4 @@
-namespace ULSAlgorithms.Optimization.Execution;
+﻿namespace ULSAlgorithms.Optimization.Execution;
 
 /// <summary>
 /// Configures one solver-backed execution of a portable linear model.
@@ -45,6 +45,16 @@ public sealed class LinearModelSolveOptions
     public double NearIntegerTolerance { get; set; } =
         LinearVariableValueNormalizer.DefaultNearIntegerTolerance;
 
+    /// <summary>
+    /// Gets or sets whether a solver candidate rejected only after numerical
+    /// normalization may be recovered by fixing all integer decisions to their
+    /// normalized values and re-optimizing the remaining continuous model.
+    /// </summary>
+    /// <remarks>
+    /// Polishing never upgrades a tolerance-only MIP result to proven optimal.
+    /// The original solver-reported optimality status is preserved.
+    /// </remarks>
+    public bool EnableFixedIntegerPolishing { get; set; } = true;
     /// <summary>
     /// Gets or sets an optional path receiving the exact LP model submitted to
     /// the selected solver.
@@ -107,3 +117,4 @@ public sealed class LinearModelSolveOptions
         }
     }
 }
+
