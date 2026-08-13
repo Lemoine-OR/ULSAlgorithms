@@ -18,7 +18,7 @@
         "adaptive-general-fallback"
       ],
       "sourcePath": "src/ULSAlgorithms/Selection/AdaptiveExactUlsSolver.cs",
-      "publication": "Wagelmans, Van Hoesel & Kolen (1992); Federgruen & Tzur (1991)",
+      "publication": "Wagelmans, Van Hoesel & Kolen (1992), Economic Lot Sizing: An O(n log n) Algorithm That Runs in Linear Time in the Wagner-Whitin Case, Operations Research 40(S1), S145-S156; Federgruen & Tzur (1991), A Simple Forward Algorithm to Solve General Dynamic Lot Sizing Models with n Periods in O(n log n) or O(n) Time, Management Science 37(8), 909-925",
       "doi": "10.1287/opre.40.1.S145",
       "implementation": "Selects the linear Wagner-Whitin specialization when applicable; otherwise uses a configurable O(T log T) general exact fallback"
     },
@@ -35,7 +35,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Exact/WagnerWhitin/WagnerWhitinClassicalSolver.cs",
-      "publication": "Wagner & Whitin (1958)",
+      "publication": "Wagner & Whitin (1958), Dynamic Version of the Economic Lot Size Model, Management Science 5(1), 89-96",
       "doi": "10.1287/mnsc.5.1.89",
       "implementation": "Classical dynamic program"
     },
@@ -52,7 +52,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Exact/WagnerWhitin/WagnerWhitinEvansSolver.cs",
-      "publication": "Evans (1985)",
+      "publication": "Evans (1985), An Efficient Implementation of the Wagner-Whitin Algorithm for Dynamic Lot-Sizing, Journal of Operations Management 5(2), 229-235",
       "doi": "10.1016/0272-6963(85)90009-9",
       "implementation": "Low-storage forward DP"
     },
@@ -69,7 +69,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Exact/WagnerWhitin/WagnerWhitinSolver.cs",
-      "publication": "Wagelmans, Van Hoesel & Kolen (1992)",
+      "publication": "Wagelmans, Van Hoesel & Kolen (1992), Economic Lot Sizing: An O(n log n) Algorithm That Runs in Linear Time in the Wagner-Whitin Case, Operations Research 40(S1), S145-S156",
       "doi": "10.1287/opre.40.1.S145",
       "implementation": "Linear convex-hull specialization"
     },
@@ -86,7 +86,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Exact/Wagelmans/WagelmansGeneralSolver.cs",
-      "publication": "Wagelmans, Van Hoesel & Kolen (1992)",
+      "publication": "Wagelmans, Van Hoesel & Kolen (1992), Economic Lot Sizing: An O(n log n) Algorithm That Runs in Linear Time in the Wagner-Whitin Case, Operations Research 40(S1), S145-S156",
       "doi": "10.1287/opre.40.1.S145",
       "implementation": "General geometric dynamic program"
     },
@@ -103,7 +103,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Exact/FedergruenTzur/FedergruenTzurSolver.cs",
-      "publication": "Federgruen & Tzur (1991)",
+      "publication": "Federgruen & Tzur (1991), A Simple Forward Algorithm to Solve General Dynamic Lot Sizing Models with n Periods in O(n log n) or O(n) Time, Management Science 37(8), 909-925",
       "doi": "10.1287/mnsc.37.8.909",
       "implementation": "Forward tree-accelerated DP"
     },
@@ -120,7 +120,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Exact/FedergruenTzur/FedergruenTzurNoSpeculativeMotiveSolver.cs",
-      "publication": "Federgruen & Tzur (1991)",
+      "publication": "Federgruen & Tzur (1991), A Simple Forward Algorithm to Solve General Dynamic Lot Sizing Models with n Periods in O(n log n) or O(n) Time, Management Science 37(8), 909-925",
       "doi": "10.1287/mnsc.37.8.909",
       "implementation": "Linear specialization"
     },
@@ -137,7 +137,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Exact/FedergruenTzur/FedergruenTzurNondecreasingSetupSolver.cs",
-      "publication": "Federgruen & Tzur (1991)",
+      "publication": "Federgruen & Tzur (1991), A Simple Forward Algorithm to Solve General Dynamic Lot Sizing Models with n Periods in O(n log n) or O(n) Time, Management Science 37(8), 909-925",
       "doi": "10.1287/mnsc.37.8.909",
       "implementation": "Linear restricted specialization"
     },
@@ -171,7 +171,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Exact/WagnerWhitin/BahlTajPlanningHorizonSolver.cs",
-      "publication": "Bahl & Taj (1991)",
+      "publication": "Bahl & Taj (1991), A data-dependent efficient implementation of the Wagner-Whitin algorithm for lot-sizing, Computers & Industrial Engineering 20(2), 289-291",
       "doi": "10.1016/0360-8352(91)90033-3",
       "implementation": "Data-dependent planning-horizon pruning"
     },
@@ -188,7 +188,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Exact/WagnerWhitin/HeadyZhuEconomicPartPeriodSolver.cs",
-      "publication": "Heady & Zhu (1994)",
+      "publication": "Heady & Zhu (1994), An Improved Implementation of the Wagner-Whitin Algorithm, Production and Operations Management 3(1), 55-63",
       "doi": "10.1111/j.1937-5956.1994.tb00109.x",
       "implementation": "Planning horizon + economic-part-period pruning"
     },
@@ -205,7 +205,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Exact/ChowdhuryBakiAzab/ChowdhuryBakiAzabSolver.cs",
-      "publication": "Chowdhury, Baki & Azab (2018)",
+      "publication": "Chowdhury, Baki & Azab (2018), Dynamic Economic Lot-Sizing Problem: A new O(T) Algorithm for the Wagner-Whitin Model, Computers & Industrial Engineering 117, 6-18",
       "doi": "10.1016/j.cie.2018.01.010",
       "implementation": "Published O(T) active-diagonal algorithm"
     },
@@ -222,7 +222,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Exact/WagnerWhitin/SadjadiAryanezhadSadeghiSolver.cs",
-      "publication": "Sadjadi, Aryanezhad & Sadeghi (2009)",
+      "publication": "Sadjadi, Aryanezhad & Sadeghi (2009), An Improved Wagner-Whitin Algorithm, International Journal of Industrial Engineering & Production Research 20, 117-123",
       "doi": "",
       "implementation": "Incremental pruning + planning horizon"
     },
@@ -241,7 +241,7 @@
         "parallelism"
       ],
       "sourcePath": "src/ULSAlgorithms/Exact/Parallel/LyuLeeParallelSolver.cs",
-      "publication": "Lyu & Lee (2001)",
+      "publication": "Lyu & Lee (2001), A Parallel Algorithm for the Dynamic Lot-Sizing Problem",
       "doi": "10.1016/S0360-8352(01)00047-X",
       "implementation": "Modern shared-memory reconstruction"
     },
@@ -258,7 +258,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Exact/SaydamMcKnew/SaydamMcKnewFastWagnerWhitinSolver.cs",
-      "publication": "Saydam & McKnew (1987)",
+      "publication": "Saydam & McKnew (1987), A Fast Microcomputer Program for Ordering Using the Wagner-Whitin Algorithm, Production and Inventory Management 28(4), 15-19",
       "doi": "",
       "implementation": "Modern contiguous triangular-cost reconstruction"
     },
@@ -275,7 +275,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Exact/JacobsKhumawala/JacobsKhumawalaBranchAndBoundSolver.cs",
-      "publication": "Jacobs & Khumawala (1987)",
+      "publication": "Jacobs & Khumawala (1987), A Simplified Procedure for Optimal Single-Level Lot Sizing, Production and Inventory Management 28(3), 39-43",
       "doi": "",
       "implementation": "Modern branch/subproblem reconstruction"
     },
@@ -292,7 +292,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Exact/Zangwill/ZangwillNetworkSolver.cs",
-      "publication": "Zangwill (1969)",
+      "publication": "Zangwill (1969), A Backlogging Model and a Multi-Echelon Model of a Dynamic Economic Lot Size Production System, Management Science 15(9), 506-527",
       "doi": "10.1287/mnsc.15.9.506",
       "implementation": "Backward DAG shortest path"
     },
@@ -311,7 +311,7 @@
         "optimization-execution"
       ],
       "sourcePath": "src/ULSAlgorithms/Exact/Formulations/AggregateInventoryFormulationSolver.cs",
-      "publication": "Wagner & Whitin (1958); Brahimi et al. (2006)",
+      "publication": "Wagner & Whitin (1958), Dynamic Version of the Economic Lot Size Model, Management Science 5(1), 89-96; Brahimi, Dauzere-Peres, Najid & Nordli (2006), Single Item Lot Sizing Problems, European Journal of Operational Research 168(1), 1-16",
       "doi": "10.1287/mnsc.5.1.89",
       "implementation": "Aggregate x/y/I MILP with automatic solver selection"
     },
@@ -330,7 +330,7 @@
         "optimization-execution"
       ],
       "sourcePath": "src/ULSAlgorithms/Exact/Formulations/FacilityLocationFormulationSolver.cs",
-      "publication": "Krarup & Bilde (1977); Brahimi et al. (2006)",
+      "publication": "Krarup & Bilde (1977), Plant Location, Set Covering and Economic Lot Size: An O(nm)-Algorithm for Structured Problems; Brahimi, Dauzere-Peres, Najid & Nordli (2006), Single Item Lot Sizing Problems, European Journal of Operational Research 168(1), 1-16",
       "doi": "10.1007/978-3-0348-5936-3_10",
       "implementation": "Disaggregated q[t,k]/y formulation"
     },
@@ -349,7 +349,7 @@
         "optimization-execution"
       ],
       "sourcePath": "src/ULSAlgorithms/Exact/Formulations/ShortestPathFormulationSolver.cs",
-      "publication": "Zangwill (1969); Brahimi et al. (2006)",
+      "publication": "Zangwill (1969), A Backlogging Model and a Multi-Echelon Model of a Dynamic Economic Lot Size Production System, Management Science 15(9), 506-527; Brahimi, Dauzere-Peres, Najid & Nordli (2006), Single Item Lot Sizing Problems, European Journal of Operational Research 168(1), 1-16",
       "doi": "10.1287/mnsc.15.9.506",
       "implementation": "Continuous network-flow formulation with path reconstruction"
     },
@@ -368,7 +368,7 @@
         "optimization-execution"
       ],
       "sourcePath": "src/ULSAlgorithms/Exact/Formulations/InventoryEliminatedFormulationSolver.cs",
-      "publication": "Brahimi et al. (2006)",
+      "publication": "Brahimi, Dauzere-Peres, Najid & Nordli (2006), Single Item Lot Sizing Problems, European Journal of Operational Research 168(1), 1-16",
       "doi": "10.1016/j.ejor.2004.01.054",
       "implementation": "Aggregate x/y formulation with inventory algebraically eliminated"
     },
@@ -388,7 +388,7 @@
         "cutting-plane"
       ],
       "sourcePath": "src/ULSAlgorithms/Exact/CuttingPlanes/GeneralLsCuttingPlaneSolver.cs",
-      "publication": "Barany, Van Roy & Wolsey (1984)",
+      "publication": "Barany, Van Roy & Wolsey (1984), Uncapacitated Lot-Sizing: The Convex Hull of Solutions",
       "doi": "10.1007/BFb0121006",
       "implementation": "Exact general (l,S) separation + strengthened final MILP"
     },
@@ -408,7 +408,7 @@
         "cutting-plane"
       ],
       "sourcePath": "src/ULSAlgorithms/Exact/CuttingPlanes/WagnerWhitinLsCuttingPlaneSolver.cs",
-      "publication": "Pochet & Wolsey (1994)",
+      "publication": "Pochet & Wolsey (1994), Polyhedra for Lot-Sizing with Wagner-Whitin Costs",
       "doi": "10.1007/BF01582225",
       "implementation": "O(T²) prefix-S Wagner–Whitin separation + strengthened final MILP"
     }
@@ -427,7 +427,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Heuristics/LotForLotSolver.cs",
-      "publication": "Classical MRP rule",
+      "publication": "Classical MRP lot-for-lot rule",
       "doi": "",
       "implementation": "One replenishment per positive-demand period"
     },
@@ -444,7 +444,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Heuristics/SilverMealSolver.cs",
-      "publication": "Silver & Meal (1973)",
+      "publication": "Silver & Meal (1973), A Heuristic for Selecting Lot Size Quantities for the Case of a Deterministic Time-Varying Demand Rate and Discrete Opportunities for Replenishment, Production and Inventory Management 14(2), 64-74",
       "doi": "",
       "implementation": "Least cost per covered period"
     },
@@ -461,7 +461,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Heuristics/LeastUnitCostSolver.cs",
-      "publication": "Classical LUC rule",
+      "publication": "Classical Least Unit Cost (LUC) lot-sizing rule",
       "doi": "",
       "implementation": "Least relevant cost per unit"
     },
@@ -478,7 +478,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Heuristics/PartPeriodBalancingSolver.cs",
-      "publication": "DeMatteis (1968)",
+      "publication": "DeMatteis (1968), An Economic Lot-Sizing Technique I: The Part-Period Algorithm, IBM Systems Journal 7(1), 30-38",
       "doi": "10.1147/sj.71.0030",
       "implementation": "Closest balance to economic part period"
     },
@@ -495,7 +495,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Heuristics/GroffSolver.cs",
-      "publication": "Groff (1979)",
+      "publication": "Groff (1979), A Lot Sizing Rule for Time-Phased Component Demand, Production and Inventory Management 20(4), 66-74",
       "doi": "",
       "implementation": "Marginal setup/holding criterion"
     },
@@ -512,7 +512,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Heuristics/PeriodicOrderQuantitySolver.cs",
-      "publication": "Classical POQ rule",
+      "publication": "Classical Periodic Order Quantity (POQ) rule",
       "doi": "",
       "implementation": "EOQ-derived replenishment interval"
     },
@@ -529,7 +529,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Heuristics/FreelandColleySolver.cs",
-      "publication": "Freeland & Colley (1982)",
+      "publication": "Freeland & Colley (1982), A Simple Heuristic Method for Lot Sizing in a Time-Phased Reorder System, Production and Inventory Management 23(1), 15-21",
       "doi": "",
       "implementation": "Local incremental carrying-cost criterion"
     },
@@ -546,7 +546,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Heuristics/PattersonLaForgeIncrementalPartPeriodSolver.cs",
-      "publication": "Patterson & LaForge (1985)",
+      "publication": "Patterson & LaForge (1985), The Incremental Part-Period Algorithm: An Alternative to EOQ, Journal of Purchasing and Materials Management 21(2), 28-33",
       "doi": "10.1111/j.1745-493X.1985.tb00132.x",
       "implementation": "Incremental part-period stopping rule"
     },
@@ -563,7 +563,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Heuristics/WemmerlovModifiedPartPeriodBalancingSolver.cs",
-      "publication": "Wemmerlöv (1983)",
+      "publication": "Wemmerlöv (1983), The Part-Period Balancing Algorithm and Its Look Ahead-Look Back Feature: A Theoretical and Experimental Analysis of a Single Stage Lot-Sizing Procedure, Journal of Operations Management 4(1), 23-39",
       "doi": "10.1016/0272-6963(83)90023-2",
       "implementation": "Corrected PPB with ν = 0.5"
     },
@@ -580,7 +580,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Heuristics/WemmerlovPpbLookAheadLookBackSolver.cs",
-      "publication": "Wemmerlöv (1983)",
+      "publication": "Wemmerlöv (1983), The Part-Period Balancing Algorithm and Its Look Ahead-Look Back Feature: A Theoretical and Experimental Analysis of a Single Stage Lot-Sizing Procedure, Journal of Operations Management 4(1), 23-39",
       "doi": "10.1016/0272-6963(83)90023-2",
       "implementation": "PPB with local LALB adjustment"
     },
@@ -597,7 +597,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Heuristics/WemmerlovModifiedPpbLookAheadLookBackSolver.cs",
-      "publication": "Wemmerlöv (1983)",
+      "publication": "Wemmerlöv (1983), The Part-Period Balancing Algorithm and Its Look Ahead-Look Back Feature: A Theoretical and Experimental Analysis of a Single Stage Lot-Sizing Procedure, Journal of Operations Management 4(1), 23-39",
       "doi": "10.1016/0272-6963(83)90023-2",
       "implementation": "Corrected PPB + LALB"
     },
@@ -614,7 +614,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Heuristics/PartPeriodSimplifiedSolver.cs",
-      "publication": "DeMatteis (1968); Baciarello et al. (2013)",
+      "publication": "DeMatteis (1968), An Economic Lot-Sizing Technique I: The Part-Period Algorithm, IBM Systems Journal 7(1), 30-38; Baciarello et al. (2013)",
       "doi": "10.5772/56004",
       "implementation": "No-overshoot EPP / Part-Period Simplified rule"
     },
@@ -631,7 +631,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Heuristics/SegerstedtReformulatedSilverMealSolver.cs",
-      "publication": "Segerstedt, Abdul-Jalbar & Samuelsson (2023)",
+      "publication": "Segerstedt, Abdul-Jalbar & Samuelsson (2023), Reformulated Silver-Meal and Similar Lot Sizing Techniques, Axioms 12(7), 661",
       "doi": "10.3390/axioms12070661",
       "implementation": "Reformulated Silver-Meal over non-zero demand events"
     },
@@ -648,7 +648,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Heuristics/ChiuModifiedLeastUnitCostSolver.cs",
-      "publication": "Chiu (2004)",
+      "publication": "Chiu (2004), A modification of the least unit cost lot-sizing heuristic, Journal of Statistics and Management Systems 7(1), 197-207",
       "doi": "10.1080/09720510.2004.10701115",
       "implementation": "Classical LUC plus cost-beneficial final-lot merge"
     },
@@ -665,7 +665,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Heuristics/ChiuTingModifiedPartPeriodBalancingSolver.cs",
-      "publication": "Chiu, Ting & Chiu (2005)",
+      "publication": "Chiu, Ting & Chiu (2005), A Modified Version of the Part Period Lot-Sizing Heuristic, International Journal for Engineering Modelling 18(1-2), 59-64",
       "doi": "",
       "implementation": "Nearest-EPP PPB plus cost-beneficial final-lot merge"
     },
@@ -682,7 +682,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Heuristics/HoChangSolisNetLeastPeriodCostSolver.cs",
-      "publication": "Ho, Chang & Solis (2006)",
+      "publication": "Ho, Chang & Solis (2006), Two modifications of the least cost per period heuristic for dynamic lot-sizing, Journal of the Operational Research Society 57(8), 1005-1013",
       "doi": "10.1057/palgrave.jors.2602076",
       "implementation": "Incremental O(T) evaluation of the published nAPC stopping rule; zero-demand periods are excluded from the average denominator"
     },
@@ -699,7 +699,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Heuristics/HoChangSolisImprovedNetLeastPeriodCostSolver.cs",
-      "publication": "Ho, Chang & Solis (2006)",
+      "publication": "Ho, Chang & Solis (2006), Two modifications of the least cost per period heuristic for dynamic lot-sizing, Journal of the Operational Research Society 57(8), 1005-1013",
       "doi": "10.1057/palgrave.jors.2602076",
       "implementation": "Incremental nAPC rule with the published improved tie-breaking stop condition"
     },
@@ -716,7 +716,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Heuristics/McLarenOrderMomentSolver.cs",
-      "publication": "McLaren (1977); Baciarello et al. (2013)",
+      "publication": "McLaren (1977), Order Moment lot-sizing rule; Baciarello et al. (2013), Lot Sizing Heuristics Performance",
       "doi": "10.5772/56004",
       "implementation": "EOQ-derived Order Moment Target with part-period accumulation and a final marginal holding/setup test"
     },
@@ -733,7 +733,7 @@
       "requiresExternalSolver": false,
       "configurationCapabilities": [],
       "sourcePath": "src/ULSAlgorithms/Heuristics/KarniMaximumPartPeriodGainSolver.cs",
-      "publication": "Karni (1981); Baciarello et al. (2013)",
+      "publication": "Karni (1981), Maximum Part-Period Gain lot-sizing rule; Baciarello et al. (2013), Lot Sizing Heuristics Performance",
       "doi": "10.5772/56004",
       "implementation": "Priority-queue acceleration of the published non-forward global smallest-part-period merge rule"
     }
