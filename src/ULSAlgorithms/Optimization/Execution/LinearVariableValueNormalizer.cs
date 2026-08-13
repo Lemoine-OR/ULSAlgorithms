@@ -29,11 +29,28 @@ public sealed class LinearVariableValueNormalizer
     /// </summary>
     public const double DefaultZeroTolerance =
         1.0e-8;
+    /// <summary>
+    /// Historical public default absolute tolerance used for integer-domain
+    /// variables.
+    /// </summary>
+    /// <remarks>
+    /// This value is retained for 1.x public-API compatibility.
+    /// Solver-backed execution uses
+    /// <see cref="SolverIntegralityTolerance"/> by default.
+    /// </remarks>
+    public const double DefaultIntegralityTolerance =
+        1.0e-7;
 
     /// <summary>
-    /// Default absolute tolerance used for integer-domain variables.
+    /// Default integrality tolerance used when normalizing values returned by
+    /// external mathematical-programming solvers.
     /// </summary>
-    public const double DefaultIntegralityTolerance =
+    /// <remarks>
+    /// The wider tolerance accommodates harmless solver residuals while the
+    /// normalized solution remains subject to independent model-feasibility
+    /// validation.
+    /// </remarks>
+    public const double SolverIntegralityTolerance =
         1.0e-5;
 
     /// <summary>
@@ -47,7 +64,7 @@ public sealed class LinearVariableValueNormalizer
     public LinearVariableValueNormalizer()
         : this(
             DefaultZeroTolerance,
-            DefaultIntegralityTolerance,
+            SolverIntegralityTolerance,
             DefaultNearIntegerTolerance)
     {
     }
@@ -204,4 +221,6 @@ public sealed class LinearVariableValueNormalizer
         }
     }
 }
+
+
 
